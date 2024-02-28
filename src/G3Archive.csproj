@@ -6,10 +6,16 @@
     <RootNamespace>src</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
+    <AssemblyVersion>1.0.1</AssemblyVersion>
+	<FileVersion>1.0.1</FileVersion>
+    <Authors>gekoN</Authors>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Product>$(AssemblyName)</Product>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
   </ItemGroup>
-
+  
 </Project>
