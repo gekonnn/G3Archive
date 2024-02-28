@@ -1,4 +1,6 @@
-﻿namespace G3Archive
+﻿using System.IO.Compression;
+
+namespace G3Archive
 {
     public class G3Pak_Archive
     {
@@ -191,10 +193,9 @@
 
         }
 
-        public void ExtractArchive()
+        public void ExtractArchive(string dest)
         {
             currentOffset = Convert.ToInt64(Header.OffsetToFiles);
-            string dest = Directory.GetCurrentDirectory() + "\\" + pak_fileName + "\\";
             
             G3Pak_FileTableEntry RootEntry = Read_FileTableEntry(currentOffset);
             ExtractEntry(RootEntry, dest);

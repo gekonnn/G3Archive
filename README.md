@@ -2,7 +2,7 @@
 G3Archive is a Gothic 3 .pak archive extractor written entirely in C# based on G3Pak's file format specification.
 
 > [!IMPORTANT]
-> G3Archive requires at least NET 7.0 Framework installed
+> G3Archive requires at least .NET 7.0 installed
 
 # Installation
 Download the [latest release](https://github.com/gekonnn/G3Archive/releases/) from Releases tab, after extracting the .zip file open the command prompt, `cd` into extracted directory and run the command following the usage below.
@@ -14,7 +14,8 @@ G3Archive [options]
 ```
 ### Options:
 ```
---extract <path>        Extracts the selected archive
+--extract  --e <path>   Extracts the selected archive
+--dest     --d <path>   Specifies directory the archive will be extracted in
 ```
 ### Example:
 ```
