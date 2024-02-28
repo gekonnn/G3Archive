@@ -145,7 +145,7 @@
             for (int i = 0; i < fileTableEntry.DirectoryEntry.DirCount; i++)
             {
                 G3Pak_FileTableEntry _fileTableEntry = fileTableEntry.DirectoryEntry.DirTable[i];
-                string FileName = String.Join("", _fileTableEntry.DirectoryEntry.FileName.Data);
+                string FileName = string.Join("", _fileTableEntry.DirectoryEntry.FileName.Data);
                 Directory.CreateDirectory(Dest_Path + FileName);
                 ExtractEntry(fileTableEntry.DirectoryEntry.DirTable[i], Dest_Path); // Extract child folders
             }
@@ -153,7 +153,7 @@
             {
 
                 G3Pak_FileTableEntry _fileTableEntry = fileTableEntry.DirectoryEntry.FileTable[i];
-                string FileName = String.Join("", _fileTableEntry.FileEntry.FileName.Data);
+                string FileName = string.Join("", _fileTableEntry.FileEntry.FileName.Data);
 
                 if (File.Exists(Dest_Path + FileName))
                 {
@@ -164,9 +164,26 @@
                 int rawData_Bytes = (int)_fileTableEntry.FileEntry.Bytes;
                 byte[] rawData = br.ReadBytes(rawData_Bytes);
 
-                Console.WriteLine(String.Format("Extracting {0} ({1} bytes)", FileName, rawData_Bytes));
+                Console.WriteLine(string.Format("Extracting {0} ({1} bytes)", FileName, rawData_Bytes));
                 using (FileStream _fs = new FileStream(Dest_Path + FileName, FileMode.CreateNew))
                 {
+                    if (_fileTableEntry.FileEntry.Compression == 2) // Extract the archive
+                    {
+                        if (rawData[0] != 120) // Make sure it has a zlib header
+                        {
+                            throw new Exception("Incorrect zlib header");
+                        }
+
+                        using (MemoryStream input = new MemoryStream(rawData))
+                        using (MemoryStream output = new MemoryStream())
+                        using (ZLibStream decompressionStream = new ZLibStream(input, CompressionMode.Decompress))
+                        {
+                            decompressionStream.CopyTo(output);
+                            rawData = output.ToArray();
+                        }
+
+                    }
+
                     _fs.Write(rawData);
                     _fs.Flush();
                 }
