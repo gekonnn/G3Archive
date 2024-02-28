@@ -14,8 +14,8 @@ G3Archive [options]
 ```
 ### Options:
 ```
---extract  --e <path>   Extracts the selected archive
---dest     --d <path>   Specifies directory the archive will be extracted in
+--extract  -e <path>   Extracts the selected archive
+--dest     -d <path>   Specifies directory the archive will be extracted in
 ```
 ### Example:
 ```
