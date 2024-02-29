@@ -23,10 +23,8 @@ namespace G3Archive
                 return;
             }
 
-            G3Pak_Archive PakFile = new G3Pak_Archive(file);
-
             Console.WriteLine("Reading archive header...");
-            PakFile.Read_PakHeader();
+            G3Pak_Archive PakFile = new G3Pak_Archive(file);
             Console.WriteLine("Extracting archive...");
             PakFile.ExtractArchive(dest + "\\" + file.Name + "\\");
             Console.WriteLine(PakFile.pak_fileName + " extracted successfully.");
