@@ -7,8 +7,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>$(MSBuildProjectName)</AssemblyName>
-    <AssemblyVersion>1.0.1</AssemblyVersion>
-	<FileVersion>1.0.1</FileVersion>
+	<AssemblyVersion>1.0.2</AssemblyVersion>
+	<FileVersion>1.0.2</FileVersion>
+	<Version>1.0.2</Version>
     <Authors>gekoN</Authors>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Product>$(AssemblyName)</Product>

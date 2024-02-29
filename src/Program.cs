@@ -23,11 +23,7 @@ namespace G3Archive
                 return;
             }
 
-            G3Pak_Archive PakFile = new G3Pak_Archive();
-            PakFile.path = file.FullName;
-
-            PakFile.pak_fileName = file.Name;
-            PakFile.pak_fileExt = file.Extension;
+            G3Pak_Archive PakFile = new G3Pak_Archive(file);
 
             Console.WriteLine("Reading archive header...");
             PakFile.Read_PakHeader();

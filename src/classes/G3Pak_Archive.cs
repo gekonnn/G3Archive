@@ -8,45 +8,49 @@ namespace G3Archive
         public string pak_fileName = string.Empty;
         public string pak_fileExt = string.Empty;
 
-        public G3Pak_Header Header;
+        private long currentOffset = 0;
 
-        private FileStream fs;
-        private BinaryReader br;
+        private G3Pak_Header Header;
+        private ReadBinary Read;
 
-        ReadBinary Read = new ReadBinary();
-
-        private long currentOffset;
+        public G3Pak_Archive(FileInfo file)
+        {
+            path = file.FullName;
+            pak_fileName = file.Name;
+            pak_fileExt = file.Extension;
+            Read = new ReadBinary(new FileStream(path, FileMode.Open, FileAccess.Read));
+        }
 
         // TODO: Move methods into their respective classes
-        private G3Pak_FileTableEntry_Header Read_FileTableEntry_Header(long offset)
+        private G3Pak_FileTableEntry_Header Read_FileTableEntry_Header(ref long offset)
         {
             G3Pak_FileTableEntry_Header header = new G3Pak_FileTableEntry_Header();
 
-            header.FileTime1    = Read.UInt64(fs, br, ref currentOffset);
-            header.FileTime2    = Read.UInt64(fs, br, ref currentOffset);
-            header.FileTime3    = Read.UInt64(fs, br, ref currentOffset);
-            header.FileSizeHigh = Read.UInt32(fs, br, ref currentOffset);
-            header.FileSizeLow  = Read.UInt32(fs, br, ref currentOffset);
-            header.Attributes   = Read.Byte(fs, br, ref currentOffset);
-            currentOffset += 3;
+            header.FileTime1    = Read.UInt64(ref offset);
+            header.FileTime2    = Read.UInt64(ref offset);
+            header.FileTime3    = Read.UInt64(ref offset);
+            header.FileSizeHigh = Read.UInt32(ref offset);
+            header.FileSizeLow  = Read.UInt32(ref offset);
+            header.Attributes   = Read.Byte(ref offset);
+            offset += 3;
 
             return header;
         }
 
-        private G3Pak_FileString Read_FileString(long offset)
+        private G3Pak_FileString Read_FileString(ref long offset)
         {
             G3Pak_FileString fileString = new G3Pak_FileString();
 
-            fileString.Length = Read.UInt32(fs, br, ref currentOffset);
+            fileString.Length = Read.UInt32(ref offset);
 
             if (fileString.Length > 0)
             {
                 fileString.Data = new Char[fileString.Length];
                 for (int i = 0; i < fileString.Length; i++)
                 {
-                    fileString.Data[i] = Read.Char(fs, br, ref currentOffset);
+                    fileString.Data[i] = Read.Char(ref offset);
                 }
-                currentOffset++; // one empty byte after the string?
+                offset++; // one empty byte after the string?
             }
             else
             {
@@ -56,60 +60,61 @@ namespace G3Archive
             return fileString;
         }
 
-        private G3Pak_FileEntry Read_FileEntry(long offset)
+        private G3Pak_FileEntry Read_FileEntry(ref long offset)
         {
             G3Pak_FileEntry fileEntry = new G3Pak_FileEntry();
 
-            fileEntry.Offset        = Read.UInt64(fs, br, ref currentOffset);
-            fileEntry.Bytes         = Read.UInt64(fs, br, ref currentOffset);
-            fileEntry.Size          = Read.UInt64(fs, br, ref currentOffset);
-            fileEntry.Encryption    = Read.UInt32(fs, br, ref currentOffset);
-            fileEntry.Compression   = Read.UInt32(fs, br, ref currentOffset);
-            fileEntry.FileName      = Read_FileString(currentOffset);
-            fileEntry.Comment       = Read_FileString(currentOffset);
+            fileEntry.Offset        = Read.UInt64(ref offset);
+            fileEntry.Bytes         = Read.UInt64(ref offset);
+            fileEntry.Size          = Read.UInt64(ref offset);
+            fileEntry.Encryption    = Read.UInt32(ref offset);
+            fileEntry.Compression   = Read.UInt32(ref offset);
+            fileEntry.FileName      = Read_FileString(ref offset);
+            fileEntry.Comment       = Read_FileString(ref offset);
 
             return fileEntry;
         }
 
-        private G3Pak_DirectoryEntry Read_DirectoryEntry(long offset)
+        private G3Pak_DirectoryEntry Read_DirectoryEntry(ref long offset)
         {
             G3Pak_DirectoryEntry directoryEntry = new G3Pak_DirectoryEntry();
 
-            directoryEntry.FileName = Read_FileString(currentOffset);
+            directoryEntry.FileName = Read_FileString(ref offset);
 
-            directoryEntry.DirCount = Read.UInt32(fs, br, ref currentOffset);
+            directoryEntry.DirCount = Read.UInt32(ref offset);
             directoryEntry.DirTable = new G3Pak_FileTableEntry[directoryEntry.DirCount];
             for (int i_dir = 0; i_dir < directoryEntry.DirCount; i_dir++)
             {
                 // Not really neccessary to do that in this case,
                 // we're doing that just to push the currentOffset further.
-                G3Pak_FileTableEntry _fileTableEntry = Read_FileTableEntry(currentOffset);
+                G3Pak_FileTableEntry _fileTableEntry = Read_FileTableEntry(ref offset);
                 directoryEntry.DirTable[i_dir] = _fileTableEntry;
             }
 
-            directoryEntry.FileCount = Read.UInt32(fs, br, ref currentOffset);
+            directoryEntry.FileCount = Read.UInt32(ref offset);
             directoryEntry.FileTable = new G3Pak_FileTableEntry[directoryEntry.FileCount];
             for (int i_file = 0; i_file < directoryEntry.FileCount; i_file++)
             {
-                G3Pak_FileTableEntry _fileTableEntry = Read_FileTableEntry(currentOffset);
+                G3Pak_FileTableEntry _fileTableEntry = Read_FileTableEntry(ref offset);
                 directoryEntry.FileTable[i_file] = _fileTableEntry;
+
             }
 
             return directoryEntry;
         }
 
-        private G3Pak_FileTableEntry Read_FileTableEntry(long offset)
+        private G3Pak_FileTableEntry Read_FileTableEntry(ref long offset)
         {
             G3Pak_FileTableEntry fileTableEntry = new G3Pak_FileTableEntry();
 
-            fileTableEntry.Header = Read_FileTableEntry_Header(currentOffset);
+            fileTableEntry.Header = Read_FileTableEntry_Header(ref offset);
             if (fileTableEntry.Header.Attributes == 16)
             {
-                fileTableEntry.DirectoryEntry = Read_DirectoryEntry(currentOffset);
+                fileTableEntry.DirectoryEntry = Read_DirectoryEntry(ref offset);
             }
             else
             {
-                fileTableEntry.FileEntry = Read_FileEntry(currentOffset);
+                fileTableEntry.FileEntry = Read_FileEntry(ref offset);
             }
 
             return fileTableEntry;
@@ -117,31 +122,26 @@ namespace G3Archive
 
         public void Read_PakHeader()
         {
-            fs = new FileStream(path, FileMode.Open, FileAccess.Read);
-            br = new BinaryReader(fs);
-
             currentOffset = 0;
 
             // Set the header
             Header = new G3Pak_Header();
-            Header.Version = Read.UInt32(fs, br, ref currentOffset);
-            Header.Product = Read.UInt32(fs, br, ref currentOffset);
+            Header.Version = Read.UInt32(ref currentOffset);
+            Header.Product = Read.UInt32(ref currentOffset);
 
-            if (Header.Product != 810955591) // Check if file is a valid G3Pak archive (G3V0)
-            {
-                throw new Exception("Specified file is not an G3Pak archive.");
-            }
+            // Check if file is a valid G3Pak archive (G3V0) 
+            if (Header.Product != 810955591) { throw new Exception("Specified file is not an G3Pak archive."); }
 
-            Header.Revision         = Read.UInt32(fs, br, ref currentOffset);
-            Header.Encryption       = Read.UInt32(fs, br, ref currentOffset);
-            Header.Compression      = Read.UInt32(fs, br, ref currentOffset);
-            Header.Reserved         = Read.UInt32(fs, br, ref currentOffset);
-            Header.OffsetToFiles    = Read.UInt64(fs, br, ref currentOffset);
-            Header.OffsetToFolders  = Read.UInt64(fs, br, ref currentOffset);
-            Header.OffsetToVolume   = Read.UInt64(fs, br, ref currentOffset);
+            Header.Revision         = Read.UInt32(ref currentOffset);
+            Header.Encryption       = Read.UInt32(ref currentOffset);
+            Header.Compression      = Read.UInt32(ref currentOffset);
+            Header.Reserved         = Read.UInt32(ref currentOffset);
+            Header.OffsetToFiles    = Read.UInt64(ref currentOffset);
+            Header.OffsetToFolders  = Read.UInt64(ref currentOffset);
+            Header.OffsetToVolume   = Read.UInt64(ref currentOffset);
         }
 
-        public void ExtractEntry(G3Pak_FileTableEntry fileTableEntry, string Dest_Path)
+        private void ExtractEntry(G3Pak_FileTableEntry fileTableEntry, string Dest_Path)
         {
             Directory.CreateDirectory(Dest_Path);
             for (int i = 0; i < fileTableEntry.DirectoryEntry.DirCount; i++)
@@ -153,28 +153,21 @@ namespace G3Archive
             }
             for (int i = 0; i < fileTableEntry.DirectoryEntry.FileCount; i++)
             {
-
                 G3Pak_FileTableEntry _fileTableEntry = fileTableEntry.DirectoryEntry.FileTable[i];
                 string FileName = string.Join("", _fileTableEntry.FileEntry.FileName.Data);
 
-                if (File.Exists(Dest_Path + FileName))
-                {
-                    File.Delete(Dest_Path + FileName);
-                }
+                if (File.Exists(Dest_Path + FileName)) { File.Delete(Dest_Path + FileName); }
 
-                fs.Seek(Convert.ToInt64(_fileTableEntry.FileEntry.Offset), SeekOrigin.Begin);
                 int rawData_Bytes = (int)_fileTableEntry.FileEntry.Bytes;
-                byte[] rawData = br.ReadBytes(rawData_Bytes);
+                byte[] rawData = Read.Bytes(Convert.ToInt64(_fileTableEntry.FileEntry.Offset), rawData_Bytes);
 
                 Console.WriteLine(string.Format("Extracting {0} ({1} bytes)", FileName, rawData_Bytes));
                 using (FileStream _fs = new FileStream(Dest_Path + FileName, FileMode.CreateNew))
                 {
                     if (_fileTableEntry.FileEntry.Compression == 2) // Extract the archive
                     {
-                        if (rawData[0] != 120) // Make sure it has a zlib header
-                        {
-                            throw new Exception("Incorrect zlib header");
-                        }
+                        // Make sure it has a zlib header
+                        if (rawData[0] != 120) { throw new Exception("Incorrect zlib header"); }
 
                         using (MemoryStream input = new MemoryStream(rawData))
                         using (MemoryStream output = new MemoryStream())
@@ -183,25 +176,23 @@ namespace G3Archive
                             decompressionStream.CopyTo(output);
                             rawData = output.ToArray();
                         }
-
                     }
 
                     _fs.Write(rawData);
                     _fs.Flush();
                 }
             }
-
         }
 
         public void ExtractArchive(string dest)
         {
             currentOffset = Convert.ToInt64(Header.OffsetToFiles);
-            
-            G3Pak_FileTableEntry RootEntry = Read_FileTableEntry(currentOffset);
+
+            G3Pak_FileTableEntry RootEntry = Read_FileTableEntry(ref currentOffset);
             ExtractEntry(RootEntry, dest);
             while (currentOffset < Convert.ToInt64(Header.OffsetToVolume))
             {
-                G3Pak_FileTableEntry fileTableEntry = Read_FileTableEntry(currentOffset);
+                G3Pak_FileTableEntry fileTableEntry = Read_FileTableEntry(ref currentOffset);
                 ExtractEntry(fileTableEntry, dest);
             }
         }
