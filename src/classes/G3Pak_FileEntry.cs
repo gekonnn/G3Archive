@@ -20,5 +20,16 @@
             FileName = new G3Pak_FileString(Read, ref offset);
             Comment = new G3Pak_FileString(Read, ref offset);
         }
+
+        public G3Pak_FileEntry(BinaryWriter bw, FileInfo file, FileInfo RootDirectory, UInt64 OffsetToFiles, string Comment = "")
+        {
+            this.Offset = OffsetToFiles;
+            this.Bytes = (uint)file.Length;
+            this.Size = (uint)File.ReadAllBytes(file.FullName).Length;
+            this.Encryption = 0;
+            this.Compression = 0; // TODO: compression support
+            this.FileName = new G3Pak_FileString(bw, Path.GetRelativePath(RootDirectory.FullName, file.FullName));
+            this.Comment = new G3Pak_FileString(bw, Comment);
+        }
     }
 }

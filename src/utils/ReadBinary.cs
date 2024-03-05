@@ -1,4 +1,6 @@
-﻿namespace G3Archive
+﻿using System.Text;
+
+namespace G3Archive
 {
     public class ReadBinary
     {
@@ -8,7 +10,7 @@
         public ReadBinary(FileStream fs)
         {
             this.fs = fs;
-            br = new BinaryReader(fs);
+            br = new BinaryReader(fs, Encoding.GetEncoding("iso-8859-1"));
         }
 
         public byte[] Bytes(ref long offset, int length)
@@ -65,6 +67,7 @@
         
         public char Char(ref long offset)
         {
+            //Console.WriteLine("Reading char at " + offset);
             fs.Seek(offset, SeekOrigin.Begin);
             offset += 1;
             return br.ReadChar();

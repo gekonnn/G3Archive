@@ -19,5 +19,15 @@
             Attributes = Read.Byte(ref offset);
             offset += 3;
         }
+
+        public G3Pak_FileTableEntry_Header(BinaryWriter bw, FileInfo File)
+        {
+            FileTime1 = (uint)File.CreationTime.ToFileTimeUtc();
+            FileTime2 = (uint)File.LastAccessTime.ToFileTimeUtc();
+            FileTime3 = (uint)File.LastWriteTime.ToFileTimeUtc();
+            FileSizeHigh = 0;
+            FileSizeLow = 0;
+            Attributes = (uint)File.Attributes;
+        }
     }
 }

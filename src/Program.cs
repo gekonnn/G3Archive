@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using CommandLine;
+﻿using CommandLine;
 
 namespace G3Archive
 {
@@ -10,24 +8,32 @@ namespace G3Archive
         {
             [Option('e', "extract", Required = false, HelpText = "Extracts the selected archive")]
             public FileInfo? Extract { get; set; }
-            [Option('d', "dest", Required = false, HelpText = "Specifies directory the archive will be extracted in")]
+            [Option('p', "pack", Required = false, HelpText = "Packages the selected folder into a PAK archive")]
+            public FileInfo? Pack { get; set; }
+            [Option('d', "dest", Required = false, HelpText = "Specifies path of output file")]
             public string? Destination { get; set; }
+            [Option("overwrite", Required = false, Default = false, HelpText = "Forces overwriting of existing files")]
+            public bool Overwrite { get; set; }
+            [Option("quiet", Required = false, Default = false, HelpText = "Hides any output information")]
+            public bool Quiet { get; set; }
         }
 
-        static void Extract(FileInfo file, string dest)
+        static void Extract(FileInfo file, string dest, bool overwrite)
         {
-            Console.WriteLine(dest);
-            if(!File.Exists(file.FullName))
-            {
-                Console.WriteLine("Error: Specified file does not exist.");
-                return;
-            }
+            Logger.Log("Reading archive header...");
+            G3Pak_Archive PakFile = new G3Pak_Archive();
+            PakFile.ReadArchive(file);
 
-            Console.WriteLine("Reading archive header...");
-            G3Pak_Archive PakFile = new G3Pak_Archive(file);
-            Console.WriteLine("Extracting archive...");
-            PakFile.ExtractArchive(dest + "\\" + file.Name + "\\");
-            Console.WriteLine(PakFile.pak_fileName + " extracted successfully.");
+            Logger.Log("Extracting archive...");
+            int result = PakFile.Extract(dest, overwrite);
+            if (result == 0) { Logger.Log(PakFile.File!.Name + " extracted successfully."); }
+        }
+
+        static void Pack(FileInfo directory, string dest, bool overwrite)
+        {
+            G3Pak_Archive PakFile = new G3Pak_Archive();
+            int result = PakFile.WriteArchive(directory, dest, overwrite);
+            if(result == 0) { Logger.Log(PakFile.File!.Name + " packed successfully."); }
         }
 
         static void Main(string[] args)
@@ -35,9 +41,21 @@ namespace G3Archive
             Parser.Default.ParseArguments<Options>(args)
             .WithParsed<Options>(o =>
             {
-                if(o.Extract != null)
+                Logger.Quiet = o.Quiet;
+                string Destination = o.Destination ?? Directory.GetCurrentDirectory();
+                
+                Destination = Path.Combine(Destination, "");
+
+                if (o.Extract != null)
                 {
-                    Extract(o.Extract, o.Destination ?? Directory.GetCurrentDirectory());
+                    if (!File.Exists(o.Extract.FullName)) { Logger.Log("Specified file does not exist"); return; }
+                    if (Destination == Directory.GetCurrentDirectory()) { Destination = Path.Combine(Destination, Path.GetFileNameWithoutExtension(o.Extract.FullName)); }
+                    Extract(o.Extract, Destination, o.Overwrite);
+                }
+                if (o.Pack != null)
+                {
+                    if (Destination == Directory.GetCurrentDirectory()) { Destination = Path.Combine(Destination, o.Pack.Name + ".pak"); }
+                    Pack(o.Pack, Destination, o.Overwrite);
                 }
             });
         }
