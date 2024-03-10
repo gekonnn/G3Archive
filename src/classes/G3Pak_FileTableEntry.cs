@@ -71,52 +71,79 @@ namespace G3Archive
             }
         }
 
-        public int Extract(ReadBinary Read, string dest, bool overwrite)
+        private byte[] Decompress(byte[] RawData)
         {
-            if (Directory.Exists(dest) && !overwrite)
+            string FileName = string.Join("", FileEntry.FileName.Data);
+            
+            // Ensure the file has a valid zlib header
+            if (RawData[0] != 0x78) { 
+                Logger.Log("Incorrect zlib header for " + FileName); 
+                return new byte[0];
+            }
+
+            try
             {
-                Logger.Log(string.Format("Warning: Directory named {0} already exists.\nConsider renaming the directory or using \"--overwrite\" option", Path.GetFileName(Path.GetDirectoryName(dest))));
+                using (MemoryStream input = new MemoryStream(RawData))
+                using (MemoryStream output = new MemoryStream())
+                {
+                    using (ZLibStream decompressionStream = new ZLibStream(input, CompressionMode.Decompress))
+                    {
+                        decompressionStream.CopyTo(output);
+                    }
+                    return output.ToArray();
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(string.Format("Decompression failed for {0} (Header = {1})", FileName, RawData[0].ToString("X2") + RawData[1].ToString("X2")));
+                Logger.Log("Exception: " + ex);
+                return new byte[0];
+            }
+        }
+
+        public void ExtractFile(ReadBinary Read, string Dest)
+        {
+            string FileName = string.Join("", FileEntry.FileName.Data);
+            Logger.Log(string.Format("Extracting {0} ({1} bytes)", FileName, FileEntry.Size));
+
+            int rawData_Bytes = (int)FileEntry.Bytes;
+            byte[] rawData = Read.Bytes(Convert.ToInt64(FileEntry.Offset), rawData_Bytes);
+
+            using (FileStream _fs = new FileStream(Path.Combine(Dest, FileName), FileMode.OpenOrCreate))
+            {
+                if (FileEntry.Compression == 2) // Extract the compressed file
+                {
+                    byte[] decompressedData = Decompress(rawData);
+                    if(rawData.Length > 0) { rawData = decompressedData; }
+                }
+
+                _fs.Write(rawData);
+                _fs.Flush();
+            }
+        }
+
+        public int ExtractDirectory(ReadBinary Read, string Dest, bool Overwrite)
+        {
+            if (Directory.Exists(Dest) && !Overwrite)
+            {
+                Logger.Log(string.Format("Warning: Directory named {0} already exists.\nConsider renaming the directory or using \"--overwrite\" option", 
+                           Path.GetFileName(Path.GetDirectoryName(Dest))));
                 return 1;
             }
 
-            Directory.CreateDirectory(dest);
-            
-            for (int i = 0; i < DirectoryEntry.DirCount; i++)
+            Directory.CreateDirectory(Dest);
+
+            foreach(G3Pak_FileTableEntry Entry in DirectoryEntry.DirTable)
             {
-                G3Pak_FileTableEntry _fileTableEntry = DirectoryEntry.DirTable[i];
-                string FileName = string.Join("", _fileTableEntry.DirectoryEntry.FileName.Data);
-                Directory.CreateDirectory(Path.Combine(dest, FileName));
-                DirectoryEntry.DirTable[i].Extract(Read, dest, true); // Extract child folders
+                string FileName = string.Join("", Entry.DirectoryEntry.FileName.Data);
+                Directory.CreateDirectory(Path.Combine(Dest, FileName));
+                Entry.ExtractDirectory(Read, Dest, true); // Extract child folders
             }
-            for (int i = 0; i < DirectoryEntry.FileCount; i++)
+            foreach (G3Pak_FileTableEntry Entry in DirectoryEntry.FileTable)
             {
-                G3Pak_FileTableEntry _fileTableEntry = DirectoryEntry.FileTable[i];
-                string FileName = string.Join("", _fileTableEntry.FileEntry.FileName.Data);
-
-                int rawData_Bytes = (int)_fileTableEntry.FileEntry.Bytes;
-                byte[] rawData = Read.Bytes(Convert.ToInt64(_fileTableEntry.FileEntry.Offset), rawData_Bytes);
-                
-                Logger.Log(string.Format("Extracting {0} ({1} bytes)", FileName, _fileTableEntry.FileEntry.Size));
-                using (FileStream _fs = new FileStream(Path.Combine(dest, FileName), FileMode.OpenOrCreate))
-                {
-                    if (_fileTableEntry.FileEntry.Compression == 2) // Extract the compressed file
-                    {
-                        // Ensure the file has a valid zlib header
-                        if (rawData[0] != 0x78) { throw new Exception("Incorrect zlib header"); }
-
-                        using (MemoryStream input = new MemoryStream(rawData))
-                        using (MemoryStream output = new MemoryStream())
-                        using (ZLibStream decompressionStream = new ZLibStream(input, CompressionMode.Decompress))
-                        {
-                            decompressionStream.CopyTo(output);
-                            rawData = output.ToArray();
-                        }
-                    }
-
-                    _fs.Write(rawData);
-                    _fs.Flush();
-                }
+                Entry.ExtractFile(Read, Dest);
             }
+
             return 0;
         }
     }

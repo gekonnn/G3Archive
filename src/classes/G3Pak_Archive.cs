@@ -54,7 +54,7 @@ namespace G3Archive
         {
             currentOffset = Convert.ToInt64(Header.OffsetToFiles);
             G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(Read, ref currentOffset);
-            int result = RootEntry.Extract(Read, dest, overwrite);
+            int result = RootEntry.ExtractDirectory(Read, dest, overwrite);
             return result;
         }
     }
