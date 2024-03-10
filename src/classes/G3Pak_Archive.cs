@@ -34,15 +34,15 @@ namespace G3Archive
                 
                 G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(bw, file, file);
                 
-                uint OffsetToFiles = (uint)bw.BaseStream.Position;
-                uint OffsetToFolders = OffsetToFiles;
+                ulong OffsetToFiles = (ulong)bw.BaseStream.Position;
+                ulong OffsetToFolders = OffsetToFiles;
 
                 // Write file entries
                 Logger.Log("Writing entries...");
                 RootEntry.WriteEntry(bw);
 
                 // Write offset to volume
-                uint OffsetToVolume = (uint)bw.BaseStream.Position - 4;
+                ulong OffsetToVolume = (ulong)bw.BaseStream.Position - 4;
                 Header.WriteOffsets(bw, OffsetToFiles, OffsetToFolders, OffsetToVolume);
             }
             return 0;
@@ -50,7 +50,7 @@ namespace G3Archive
 
         public int Extract(string dest, bool overwrite)
         {
-            Read.fs.Seek((int)Header.OffsetToFiles, SeekOrigin.Begin);
+            Read.fs.Seek((long)Header.OffsetToFiles, SeekOrigin.Begin);
             G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(Read);
             int result = RootEntry.ExtractDirectory(Read, dest, overwrite);
             return result;

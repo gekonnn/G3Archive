@@ -66,17 +66,17 @@
         {
             long OriginalOffset = bw.BaseStream.Position;
 
-            bw.Seek((int)Pos_OffsetToFiles, SeekOrigin.Begin);
+            bw.BaseStream.Seek(Pos_OffsetToFiles, SeekOrigin.Begin);
             bw.Write(OffsetToFiles);
             this.OffsetToFiles = OffsetToFiles;
-            bw.Seek((int)Pos_OffsetToFolders, SeekOrigin.Begin);
+            bw.BaseStream.Seek(Pos_OffsetToFolders, SeekOrigin.Begin);
             bw.Write(OffsetToFolders);
             this.OffsetToFolders = OffsetToFolders;
-            bw.Seek((int)Pos_OffsetToVolume, SeekOrigin.Begin);
+            bw.BaseStream.Seek(Pos_OffsetToVolume, SeekOrigin.Begin);
             bw.Write(OffsetToVolume);
             this.OffsetToVolume = OffsetToVolume;
 
-            bw.Seek((int)OriginalOffset, SeekOrigin.Begin);
+            bw.BaseStream.Seek(OriginalOffset, SeekOrigin.Begin);
         }
     }
 }
