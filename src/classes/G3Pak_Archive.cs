@@ -5,8 +5,6 @@ namespace G3Archive
     public class G3Pak_Archive
     {
         public FileInfo? File;
-        private long currentOffset = 0;
-
         private G3Pak_ArchiveHeader Header = default!;
         private ReadBinary Read = default!;
 
@@ -14,7 +12,7 @@ namespace G3Archive
         {
             File = file;
             Read = new ReadBinary(new FileStream(file.FullName, FileMode.Open, FileAccess.Read));
-            Header = new G3Pak_ArchiveHeader(Read, ref currentOffset);
+            Header = new G3Pak_ArchiveHeader(Read);
         }
 
         public int WriteArchive(FileInfo file, string dest, bool overwrite)
@@ -52,8 +50,8 @@ namespace G3Archive
 
         public int Extract(string dest, bool overwrite)
         {
-            currentOffset = Convert.ToInt64(Header.OffsetToFiles);
-            G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(Read, ref currentOffset);
+            Read.fs.Seek((int)Header.OffsetToFiles, SeekOrigin.Begin);
+            G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(Read);
             int result = RootEntry.ExtractDirectory(Read, dest, overwrite);
             return result;
         }

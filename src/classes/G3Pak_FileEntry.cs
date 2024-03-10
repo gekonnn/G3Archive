@@ -10,15 +10,15 @@
         public G3Pak_FileString FileName;
         public G3Pak_FileString Comment;
 
-        public G3Pak_FileEntry(ReadBinary Read, ref long offset)
+        public G3Pak_FileEntry(ReadBinary Read)
         {
-            Offset = Read.UInt64(ref offset);
-            Bytes = Read.UInt64(ref offset);
-            Size = Read.UInt64(ref offset);
-            Encryption = Read.UInt32(ref offset);
-            Compression = Read.UInt32(ref offset);
-            FileName = new G3Pak_FileString(Read, ref offset);
-            Comment = new G3Pak_FileString(Read, ref offset);
+            Offset = Read.UInt64();
+            Bytes = Read.UInt64();
+            Size = Read.UInt64();
+            Encryption = Read.UInt32();
+            Compression = Read.UInt32();
+            FileName = new G3Pak_FileString(Read);
+            Comment = new G3Pak_FileString(Read);
         }
 
         public G3Pak_FileEntry(BinaryWriter bw, FileInfo file, FileInfo RootDirectory, UInt64 OffsetToFiles, string Comment = "")

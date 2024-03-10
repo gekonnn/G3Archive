@@ -9,15 +9,15 @@
         public UInt32 FileSizeLow;
         public UInt32 Attributes;
 
-        public G3Pak_FileTableEntry_Header(ReadBinary Read, ref long offset)
+        public G3Pak_FileTableEntry_Header(ReadBinary Read)
         {
-            FileTime1 = Read.UInt64(ref offset);
-            FileTime2 = Read.UInt64(ref offset);
-            FileTime3 = Read.UInt64(ref offset);
-            FileSizeHigh = Read.UInt32(ref offset);
-            FileSizeLow = Read.UInt32(ref offset);
-            Attributes = Read.Byte(ref offset);
-            offset += 3;
+            FileTime1 = Read.UInt64();
+            FileTime2 = Read.UInt64();
+            FileTime3 = Read.UInt64();
+            FileSizeHigh = Read.UInt32();
+            FileSizeLow = Read.UInt32();
+            Attributes = Read.Byte();
+            Read.fs.Seek(Read.fs.Position + 3, SeekOrigin.Begin);
         }
 
         public G3Pak_FileTableEntry_Header(BinaryWriter bw, FileInfo File)

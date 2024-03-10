@@ -5,18 +5,18 @@
         public UInt32 Length;
         public char[] Data = new char[0];
 
-        public G3Pak_FileString(ReadBinary Read, ref long offset)
+        public G3Pak_FileString(ReadBinary Read)
         {
-            Length = Read.UInt32(ref offset);
+            Length = Read.UInt32();
 
             if (Length > 0)
             {
                 Data = new char[Length];
                 for (int i = 0; i < Length; i++)
                 {
-                    Data[i] = Read.Char(ref offset);
+                    Data[i] = Read.Char();
                 }
-                offset++; // one empty byte after the string
+                Read.Byte(); // one empty byte after the string
             }
             else
             {

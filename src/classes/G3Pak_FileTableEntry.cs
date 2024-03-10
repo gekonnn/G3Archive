@@ -8,16 +8,16 @@ namespace G3Archive
         public G3Pak_DirectoryEntry DirectoryEntry = default!;
         public G3Pak_FileEntry FileEntry = default!;
 
-        public G3Pak_FileTableEntry(ReadBinary Read, ref long offset)
+        public G3Pak_FileTableEntry(ReadBinary Read)
         {
-            Header = new G3Pak_FileTableEntry_Header(Read, ref offset);
+            Header = new G3Pak_FileTableEntry_Header(Read);
             if (Header.Attributes == 16)
             {
-                DirectoryEntry = new G3Pak_DirectoryEntry(Read, ref offset);
+                DirectoryEntry = new G3Pak_DirectoryEntry(Read);
             }
             else
             {
-                FileEntry = new G3Pak_FileEntry(Read, ref offset);
+                FileEntry = new G3Pak_FileEntry(Read);
             }
         }
 
@@ -106,8 +106,9 @@ namespace G3Archive
             string FileName = string.Join("", FileEntry.FileName.Data);
             Logger.Log(string.Format("Extracting {0} ({1} bytes)", FileName, FileEntry.Size));
 
+            Read.fs.Seek(Convert.ToInt64(FileEntry.Offset), SeekOrigin.Begin);
             int rawData_Bytes = (int)FileEntry.Bytes;
-            byte[] rawData = Read.Bytes(Convert.ToInt64(FileEntry.Offset), rawData_Bytes);
+            byte[] rawData = Read.Bytes(rawData_Bytes);
 
             using (FileStream _fs = new FileStream(Path.Combine(Dest, FileName), FileMode.OpenOrCreate))
             {
