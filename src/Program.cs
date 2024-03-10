@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using System.Diagnostics;
 
 namespace G3Archive
 {
@@ -20,20 +21,32 @@ namespace G3Archive
 
         static void Extract(FileInfo file, string dest, bool overwrite)
         {
+            if (!File.Exists(file.FullName)) { Logger.Log("Specified file does not exist"); return; }
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
             Logger.Log("Reading archive header...");
             G3Pak_Archive PakFile = new G3Pak_Archive();
             PakFile.ReadArchive(file);
 
             Logger.Log("Extracting archive...");
             int result = PakFile.Extract(dest, overwrite);
-            if (result == 0) { Logger.Log(PakFile.File!.Name + " extracted successfully."); }
+
+            sw.Stop();
+            if (result == 0) { Logger.Log(string.Format("{0} extracted successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
         }
 
         static void Pack(FileInfo directory, string dest, bool overwrite)
         {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+
             G3Pak_Archive PakFile = new G3Pak_Archive();
             int result = PakFile.WriteArchive(directory, dest, overwrite);
-            if(result == 0) { Logger.Log(PakFile.File!.Name + " packed successfully."); }
+
+            sw.Stop();
+            if (result == 0) { Logger.Log(string.Format("{0} packed successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
         }
 
         static void Main(string[] args)
@@ -48,7 +61,6 @@ namespace G3Archive
 
                 if (o.Extract != null)
                 {
-                    if (!File.Exists(o.Extract.FullName)) { Logger.Log("Specified file does not exist"); return; }
                     if (Destination == Directory.GetCurrentDirectory()) { Destination = Path.Combine(Destination, Path.GetFileNameWithoutExtension(o.Extract.FullName)); }
                     Extract(o.Extract, Destination, o.Overwrite);
                 }
