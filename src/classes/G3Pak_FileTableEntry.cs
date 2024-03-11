@@ -71,14 +71,14 @@ namespace G3Archive
             }
         }
 
-        private byte[] Decompress(byte[] RawData)
+        private async Task<byte[]> Decompress(byte[] RawData)
         {
             string FileName = string.Join("", FileEntry.FileName.Data);
             
             // Ensure the file has a valid zlib header
             if (RawData[0] != 0x78) { 
-                Logger.Log("Incorrect zlib header for " + FileName); 
-                return new byte[0];
+                Logger.Log("Incorrect zlib header for " + FileName);
+                return Array.Empty<byte>();
             }
 
             try
@@ -88,7 +88,7 @@ namespace G3Archive
                 {
                     using (ZLibStream decompressionStream = new ZLibStream(input, CompressionMode.Decompress))
                     {
-                        decompressionStream.CopyTo(output);
+                        await decompressionStream.CopyToAsync(output);
                     }
                     return output.ToArray();
                 }
@@ -97,11 +97,11 @@ namespace G3Archive
             {
                 Logger.Log(string.Format("Decompression failed for {0} (Header = {1})", FileName, RawData[0].ToString("X2") + RawData[1].ToString("X2")));
                 Logger.Log("Exception: " + ex);
-                return new byte[0];
+                return Array.Empty<byte>();
             }
         }
 
-        public void ExtractFile(ReadBinary Read, string Dest)
+        public async Task ExtractFile(ReadBinary Read, string Dest)
         {
             string FileName = string.Join("", FileEntry.FileName.Data);
             Logger.Log(string.Format("Extracting {0} ({1} bytes)", FileName, FileEntry.Size));
@@ -114,16 +114,16 @@ namespace G3Archive
             {
                 if (FileEntry.Compression == 2) // Extract the compressed file
                 {
-                    byte[] decompressedData = Decompress(rawData);
+                    byte[] decompressedData = await Decompress(rawData);
                     if(rawData.Length > 0) { rawData = decompressedData; }
                 }
 
-                _fs.Write(rawData);
-                _fs.Flush();
+                await _fs.WriteAsync(rawData);
+                await _fs.FlushAsync();
             }
         }
-
-        public int ExtractDirectory(ReadBinary Read, string Dest, bool Overwrite)
+        
+        public async Task<int> ExtractDirectory(ReadBinary Read, string Dest, bool Overwrite)
         {
             if (Directory.Exists(Dest) && !Overwrite)
             {
@@ -138,12 +138,15 @@ namespace G3Archive
             {
                 string FileName = string.Join("", Entry.DirectoryEntry.FileName.Data);
                 Directory.CreateDirectory(Path.Combine(Dest, FileName));
-                Entry.ExtractDirectory(Read, Dest, true); // Extract child folders
+                Entry.ExtractDirectory(Read, Dest, true).Wait(); // Extract child folders recursively
             }
+            
+            List<Task> tasks = new List<Task>();
             foreach (G3Pak_FileTableEntry Entry in DirectoryEntry.FileTable)
             {
-                Entry.ExtractFile(Read, Dest);
+                tasks.Add(Entry.ExtractFile(Read, Dest));
             }
+            await Task.WhenAll(tasks);
 
             return 0;
         }

@@ -19,7 +19,7 @@ namespace G3Archive
             public bool Quiet { get; set; }
         }
 
-        static void Extract(FileInfo file, string dest, bool overwrite)
+        static async Task Extract(FileInfo file, string dest, bool overwrite)
         {
             if (!File.Exists(file.FullName)) { Logger.Log("Specified file does not exist"); return; }
 
@@ -31,7 +31,7 @@ namespace G3Archive
             PakFile.ReadArchive(file);
 
             Logger.Log("Extracting archive...");
-            int result = PakFile.Extract(dest, overwrite);
+            int result = await PakFile.Extract(dest, overwrite);
 
             sw.Stop();
             if (result == 0) { Logger.Log(string.Format("{0} extracted successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
@@ -62,7 +62,7 @@ namespace G3Archive
                 if (o.Extract != null)
                 {
                     if (Destination == Directory.GetCurrentDirectory()) { Destination = Path.Combine(Destination, Path.GetFileNameWithoutExtension(o.Extract.FullName)); }
-                    Extract(o.Extract, Destination, o.Overwrite);
+                    Extract(o.Extract, Destination, o.Overwrite).Wait();
                 }
                 if (o.Pack != null)
                 {

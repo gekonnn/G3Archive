@@ -48,11 +48,11 @@ namespace G3Archive
             return 0;
         }
 
-        public int Extract(string dest, bool overwrite)
+        public async Task<int> Extract(string dest, bool overwrite)
         {
             Read.fs.Seek((long)Header.OffsetToFiles, SeekOrigin.Begin);
             G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(Read);
-            int result = RootEntry.ExtractDirectory(Read, dest, overwrite);
+            int result = RootEntry.ExtractDirectory(Read, dest, overwrite).Result;
             return result;
         }
     }
