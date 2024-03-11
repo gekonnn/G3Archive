@@ -15,14 +15,14 @@ namespace G3Archive
             Header = new G3Pak_ArchiveHeader(Read);
         }
 
-        public int WriteArchive(FileInfo file, string dest, bool overwrite)
+        public bool WriteArchive(FileInfo file, string dest, bool overwrite)
         {
             File = new FileInfo(dest);
 
             if (File.Exists && !overwrite)
             {
                 Logger.Log(string.Format("Warning: File named {0} already exists.\nConsider renaming the file or using the \"--overwrite\" option.", File.Name));
-                return 1;
+                return false;
             }
 
             if (File.DirectoryName != null) { Directory.CreateDirectory(File.DirectoryName); }
@@ -45,15 +45,15 @@ namespace G3Archive
                 ulong OffsetToVolume = (ulong)bw.BaseStream.Position - 4;
                 Header.WriteOffsets(bw, OffsetToFiles, OffsetToFolders, OffsetToVolume);
             }
-            return 0;
+            return true;
         }
 
-        public async Task<int> Extract(string dest, bool overwrite)
+        public async Task<bool> Extract(string dest, bool overwrite)
         {
             Read.fs.Seek((long)Header.OffsetToFiles, SeekOrigin.Begin);
             G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(Read);
-            int result = RootEntry.ExtractDirectory(Read, dest, overwrite).Result;
-            return result;
+            bool success = await RootEntry.ExtractDirectory(Read, dest, overwrite);
+            return success;
         }
     }
 }

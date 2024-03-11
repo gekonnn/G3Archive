@@ -31,10 +31,10 @@ namespace G3Archive
             PakFile.ReadArchive(file);
 
             Logger.Log("Extracting archive...");
-            int result = await PakFile.Extract(dest, overwrite);
+            bool success = await PakFile.Extract(dest, overwrite);
 
             sw.Stop();
-            if (result == 0) { Logger.Log(string.Format("{0} extracted successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
+            if (success) { Logger.Log(string.Format("{0} extracted successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
         }
 
         static void Pack(FileInfo directory, string dest, bool overwrite)
@@ -43,10 +43,10 @@ namespace G3Archive
             sw.Start();
 
             G3Pak_Archive PakFile = new G3Pak_Archive();
-            int result = PakFile.WriteArchive(directory, dest, overwrite);
+            bool success = PakFile.WriteArchive(directory, dest, overwrite);
 
             sw.Stop();
-            if (result == 0) { Logger.Log(string.Format("{0} packed successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
+            if (success) { Logger.Log(string.Format("{0} packed successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
         }
 
         static void Main(string[] args)

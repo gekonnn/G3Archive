@@ -123,13 +123,13 @@ namespace G3Archive
             }
         }
         
-        public async Task<int> ExtractDirectory(ReadBinary Read, string Dest, bool Overwrite)
+        public async Task<bool> ExtractDirectory(ReadBinary Read, string Dest, bool Overwrite)
         {
             if (Directory.Exists(Dest) && !Overwrite)
             {
                 Logger.Log(string.Format("Warning: Directory named {0} already exists.\nConsider renaming the directory or using \"--overwrite\" option", 
                            Path.GetFileName(Path.GetDirectoryName(Dest))));
-                return 1;
+                return false;
             }
 
             Directory.CreateDirectory(Dest);
@@ -148,7 +148,7 @@ namespace G3Archive
             }
             await Task.WhenAll(tasks);
 
-            return 0;
+            return true;
         }
     }
 }
