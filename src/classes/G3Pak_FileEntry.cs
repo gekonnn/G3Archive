@@ -31,5 +31,16 @@
             this.FileName = new G3Pak_FileString(bw, Path.GetRelativePath(RootDirectory.FullName, file.FullName));
             this.Comment = new G3Pak_FileString(bw, Comment);
         }
+
+        public void Write(BinaryWriter bw)
+        {
+            bw.Write(Offset);
+            bw.Write(Bytes);
+            bw.Write(Size);
+            bw.Write(Encryption);
+            bw.Write(Compression);
+            FileName.Write(bw);
+            Comment.Write(bw);
+        }
     }
 }

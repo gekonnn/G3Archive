@@ -37,12 +37,7 @@ namespace G3Archive
         public void WriteEntry(BinaryWriter bw)
         {
             // Write header
-            bw.Write(Header.FileTime1);
-            bw.Write(Header.FileTime2);
-            bw.Write(Header.FileTime3);
-            bw.Write(Header.FileSizeHigh);
-            bw.Write(Header.FileSizeLow);
-            bw.Write(Header.Attributes);
+            Header.Write(bw);
 
             // Write DirectoryEntry
             if (((FileAttributes)Header.Attributes & FileAttributes.Directory) > 0)
@@ -61,13 +56,7 @@ namespace G3Archive
             }
             else // Write FileEntry
             {
-                bw.Write(FileEntry.Offset);
-                bw.Write(FileEntry.Bytes);
-                bw.Write(FileEntry.Size);
-                bw.Write(FileEntry.Encryption);
-                bw.Write(FileEntry.Compression);
-                FileEntry.FileName.Write(bw);
-                FileEntry.Comment.Write(bw);
+                FileEntry.Write(bw);
             }
         }
 

@@ -29,5 +29,15 @@
             // Add G3PakFileAttribute_Packed attribute
             Attributes = (uint)File.Attributes + 0x20000;
         }
+
+        public void Write(BinaryWriter bw)
+        {
+            bw.Write(FileTime1);
+            bw.Write(FileTime2);
+            bw.Write(FileTime3);
+            bw.Write(FileSizeHigh);
+            bw.Write(FileSizeLow);
+            bw.Write(Attributes);
+        }
     }
 }
