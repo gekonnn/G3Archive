@@ -31,7 +31,7 @@
             if (Length > 0)
             {
                 Data = new char[Length];
-                Data = String.ToArray();
+                Data = String.Replace("\\", "/").ToArray();
             }
             else
             {

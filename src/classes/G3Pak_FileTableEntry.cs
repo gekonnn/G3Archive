@@ -11,7 +11,7 @@ namespace G3Archive
         public G3Pak_FileTableEntry(ReadBinary Read)
         {
             Header = new G3Pak_FileTableEntry_Header(Read);
-            if (Header.Attributes == 16)
+            if (((FileAttributes)Header.Attributes & FileAttributes.Directory) > 0)
             {
                 DirectoryEntry = new G3Pak_DirectoryEntry(Read);
             }

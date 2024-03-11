@@ -16,18 +16,18 @@
             FileTime3 = Read.UInt64();
             FileSizeHigh = Read.UInt32();
             FileSizeLow = Read.UInt32();
-            Attributes = Read.Byte();
-            Read.fs.Seek(Read.fs.Position + 3, SeekOrigin.Begin);
+            Attributes = Read.UInt32();
         }
 
         public G3Pak_FileTableEntry_Header(BinaryWriter bw, FileInfo File)
         {
-            FileTime1 = (uint)File.CreationTime.ToFileTimeUtc();
-            FileTime2 = (uint)File.LastAccessTime.ToFileTimeUtc();
-            FileTime3 = (uint)File.LastWriteTime.ToFileTimeUtc();
+            FileTime1 = (ulong)File.CreationTime.ToFileTimeUtc();
+            FileTime2 = (ulong)File.LastAccessTime.ToFileTimeUtc();
+            FileTime3 = (ulong)File.LastWriteTime.ToFileTimeUtc();
             FileSizeHigh = 0;
             FileSizeLow = 0;
-            Attributes = (uint)File.Attributes;
+            // Add G3PakFileAttribute_Packed attribute
+            Attributes = (uint)File.Attributes + 0x20000;
         }
     }
 }
