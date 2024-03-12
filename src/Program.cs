@@ -51,6 +51,11 @@ namespace G3Archive
 
         static void Main(string[] args)
         {
+            if (args.Length == 0)
+            {
+                args = new[] { "--help" };
+            }
+            
             Parser.Default.ParseArguments<Options>(args)
             .WithParsed<Options>(o =>
             {
