@@ -37,6 +37,11 @@ namespace G3Archive
 
         static void Main(string[] args)
         {
+            if (File.Exists(args[0]))
+            {
+                args = new[] { "-e", args[0] };
+            }
+
             if (args.Length == 0)
             {
                 args = new[] { "--help" };
