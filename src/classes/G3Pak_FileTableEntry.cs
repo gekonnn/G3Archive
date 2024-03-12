@@ -112,12 +112,12 @@ namespace G3Archive
             }
         }
         
-        public async Task<bool> ExtractDirectory(ReadBinary Read, string Dest)
+        public async Task<bool> ExtractDirectory(ReadBinary Read, string Dest, bool Overwrite)
         {
-            if (Directory.Exists(Dest) && !ParsedOptions.Overwrite)
+            if (Directory.Exists(Dest) && !Overwrite)
             {
                 Logger.Log(string.Format("Warning: Directory named {0} already exists.\nConsider renaming the directory or using \"--overwrite\" option", 
-                           Path.GetFileName(Path.GetDirectoryName(Dest))));
+                           Path.GetFileName(Dest)));
                 return false;
             }
 
@@ -127,7 +127,7 @@ namespace G3Archive
             {
                 string FileName = string.Join("", Entry.DirectoryEntry.FileName.Data);
                 Directory.CreateDirectory(Path.Combine(Dest, FileName));
-                Entry.ExtractDirectory(Read, Dest).Wait(); // Extract child folders recursively
+                Entry.ExtractDirectory(Read, Dest, true).Wait(); // Extract child folders recursively
             }
             
             List<Task> tasks = new List<Task>();

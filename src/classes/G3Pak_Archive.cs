@@ -52,7 +52,7 @@ namespace G3Archive
         {
             Read.fs.Seek((long)Header.OffsetToFiles, SeekOrigin.Begin);
             G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(Read);
-            bool success = await RootEntry.ExtractDirectory(Read, Dest);
+            bool success = await RootEntry.ExtractDirectory(Read, Dest, ParsedOptions.Overwrite);
             return success;
         }
     }

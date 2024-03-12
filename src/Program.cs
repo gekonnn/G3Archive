@@ -41,7 +41,7 @@ namespace G3Archive
             {
                 args = new[] { "--help" };
             }
-            
+
             Parser.Default.ParseArguments<Options>(args)
             .WithParsed<Options>(o =>
             {
@@ -58,12 +58,12 @@ namespace G3Archive
 
                 if (o.Extract != null)
                 {
-                    if (Destination == Directory.GetCurrentDirectory()) { Destination = Path.Combine(Destination, Path.GetFileNameWithoutExtension(o.Extract.FullName)); }
+                    if (Destination == Directory.GetCurrentDirectory()) { ParsedOptions.Destination = Path.Combine(Destination, Path.GetFileNameWithoutExtension(o.Extract.FullName)); }
                     Extract(o.Extract).Wait();
                 }
                 if (o.Pack != null)
                 {
-                    if (Destination == Directory.GetCurrentDirectory()) { Destination = Path.Combine(Destination, o.Pack.Name + ".pak"); }
+                    if (Destination == Directory.GetCurrentDirectory()) { ParsedOptions.Destination = Path.Combine(Destination, o.Pack.Name + ".pak"); }
                     Pack(o.Pack);
                 }
             });
