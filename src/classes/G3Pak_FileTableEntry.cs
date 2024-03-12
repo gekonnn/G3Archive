@@ -11,7 +11,7 @@ namespace G3Archive
         public G3Pak_FileTableEntry(ReadBinary Read)
         {
             Header = new G3Pak_FileTableEntry_Header(Read);
-            if (((FileAttributes)Header.Attributes & FileAttributes.Directory) > 0)
+            if ((Header.Attributes & (uint)G3Pak_FileAttribute.Directory) > 0)
             {
                 DirectoryEntry = new G3Pak_DirectoryEntry(Read);
             }
@@ -24,7 +24,7 @@ namespace G3Archive
         public G3Pak_FileTableEntry(BinaryWriter bw, FileInfo File, FileInfo RootDirectory, UInt64 OffsetToFiles = 0)
         {
             Header = new G3Pak_FileTableEntry_Header(bw, File);
-            if (((FileAttributes)Header.Attributes & FileAttributes.Directory) > 0)
+            if ((Header.Attributes & (uint)G3Pak_FileAttribute.Directory) > 0)
             {
                 DirectoryEntry = new G3Pak_DirectoryEntry(bw, File, RootDirectory);
             }
@@ -40,7 +40,7 @@ namespace G3Archive
             Header.Write(bw);
 
             // Write DirectoryEntry
-            if (((FileAttributes)Header.Attributes & FileAttributes.Directory) > 0)
+            if ((Header.Attributes & (uint)G3Pak_FileAttribute.Directory) > 0)
             {
                 DirectoryEntry.FileName.Write(bw);
                 bw.Write(DirectoryEntry.DirCount);
