@@ -15,11 +15,11 @@ namespace G3Archive
             Header = new G3Pak_ArchiveHeader(Read);
         }
 
-        public bool WriteArchive(FileInfo file, string dest, bool overwrite)
+        public bool WriteArchive(FileInfo file, string Dest)
         {
-            File = new FileInfo(dest);
+            File = new FileInfo(Dest);
 
-            if (File.Exists && !overwrite)
+            if (File.Exists && !ParsedOptions.Overwrite)
             {
                 Logger.Log(string.Format("Warning: File named {0} already exists.\nConsider renaming the file or using the \"--overwrite\" option.", File.Name));
                 return false;
@@ -48,11 +48,11 @@ namespace G3Archive
             return true;
         }
 
-        public async Task<bool> Extract(string dest, bool overwrite)
+        public async Task<bool> Extract(string Dest)
         {
             Read.fs.Seek((long)Header.OffsetToFiles, SeekOrigin.Begin);
             G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(Read);
-            bool success = await RootEntry.ExtractDirectory(Read, dest, overwrite);
+            bool success = await RootEntry.ExtractDirectory(Read, Dest);
             return success;
         }
     }
