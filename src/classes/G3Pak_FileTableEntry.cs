@@ -3,7 +3,7 @@
 namespace G3Archive
 {
     public class G3Pak_FileTableEntry
-    {
+    {   
         public G3Pak_FileTableEntry_Header Header;
         public G3Pak_DirectoryEntry DirectoryEntry = default!;
         public G3Pak_FileEntry FileEntry = default!;
@@ -101,7 +101,7 @@ namespace G3Archive
 
             using (FileStream _fs = new FileStream(Path.Combine(Dest, FileName), FileMode.OpenOrCreate))
             {
-                if (FileEntry.Compression == 2) // Extract the compressed file
+                if (FileEntry.Compression == (int)G3Pak_Compression.Zip)
                 {
                     byte[] decompressedData = await Decompress(rawData);
                     if(rawData.Length > 0) { rawData = decompressedData; }
