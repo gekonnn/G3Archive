@@ -10,7 +10,7 @@ namespace G3Archive
         public FileInfo? Pack { get; set; }
         [Option('d', "dest", Required = false, HelpText = "Specifies path of output file")]
         public string? Destination { get; set; }
-        [Option("exclude-deleted", Required = false, Default = false, HelpText = "Excludes deleted files from being extracted")]
+        [Option("exclude-deleted", Required = false, Default = false, HelpText = "Prevents files marked as deleted from being output")]
         public bool ExcludeDeleted { get; set; }
         [Option("overwrite", Required = false, Default = false, HelpText = "Forces overwriting of existing files")]
         public bool Overwrite { get; set; }

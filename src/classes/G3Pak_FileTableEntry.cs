@@ -132,7 +132,7 @@ namespace G3Archive
                 if (ParsedOptions.ExcludeDeleted && FileName.StartsWith("_deleted")) { continue; }
 
                 Directory.CreateDirectory(Path.Combine(Dest, FileName));
-                Entry.ExtractDirectory(Read, Dest, true).Wait(); // Extract child folders recursively
+                await Entry.ExtractDirectory(Read, Dest, true); // Extract child folders recursively
             }
             
             List<Task> tasks = new List<Task>();
