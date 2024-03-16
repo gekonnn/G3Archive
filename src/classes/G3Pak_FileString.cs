@@ -39,6 +39,11 @@
             }
         }
 
+        public string GetString()
+        {
+            return string.Join("", Data);
+        }
+
         public void Write(BinaryWriter bw)
         {
             bw.Write(Length);

@@ -62,7 +62,7 @@ namespace G3Archive
 
         private async Task<byte[]> Decompress(byte[] RawData)
         {
-            string FileName = string.Join("", FileEntry.FileName.Data);
+            string FileName = FileEntry.FileName.GetString();
             
             // Ensure the file has a valid zlib header
             if (RawData[0] != 0x78) { 
@@ -92,7 +92,7 @@ namespace G3Archive
 
         public async Task ExtractFile(ReadBinary Read, string Dest)
         {
-            string FileName = string.Join("", FileEntry.FileName.Data);
+            string FileName = FileEntry.FileName.GetString();
 
             Logger.Log(string.Format("Extracting {0} ({1} bytes)", FileName, FileEntry.Size));
 
@@ -126,7 +126,7 @@ namespace G3Archive
 
             foreach(G3Pak_FileTableEntry Entry in DirectoryEntry.DirTable)
             {
-                string FileName = string.Join("", Entry.DirectoryEntry.FileName.Data);
+                string FileName = Entry.DirectoryEntry.FileName.GetString();
 
                 // Skip "_deleted" directories if ExcludeDeleted is enabled.
                 if (ParsedOptions.ExcludeDeleted && FileName.StartsWith("_deleted")) { continue; }
@@ -140,7 +140,7 @@ namespace G3Archive
             {
                 // Skip "_deleted" files if ExcludeDeleted is enabled.
                 if (ParsedOptions.ExcludeDeleted && ((Header.Attributes & (uint)G3Pak_FileAttribute.Deleted) > 0 || 
-                    string.Join("", Entry.FileEntry.FileName.Data).StartsWith("_deleted"))) { continue; }
+                    Entry.FileEntry.FileName.GetString().StartsWith("_deleted"))) { continue; }
                 
                 tasks.Add(Entry.ExtractFile(Read, Dest));
             }
