@@ -5,6 +5,7 @@
         public static FileInfo? Extract;
         public static FileInfo? Pack;
         public static string Destination = default!;
+        public static bool ExcludeDeleted = default!;
         public static bool Overwrite = default!;
         public static bool Quiet = default!;
     }

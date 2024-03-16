@@ -93,6 +93,7 @@ namespace G3Archive
         public async Task ExtractFile(ReadBinary Read, string Dest)
         {
             string FileName = string.Join("", FileEntry.FileName.Data);
+
             Logger.Log(string.Format("Extracting {0} ({1} bytes)", FileName, FileEntry.Size));
 
             Read.fs.Seek(Convert.ToInt64(FileEntry.Offset), SeekOrigin.Begin);
@@ -104,7 +105,7 @@ namespace G3Archive
                 if (FileEntry.Compression == (int)G3Pak_Compression.Zip)
                 {
                     byte[] decompressedData = await Decompress(rawData);
-                    if(rawData.Length > 0) { rawData = decompressedData; }
+                    if (rawData.Length > 0) { rawData = decompressedData; }
                 }
 
                 await _fs.WriteAsync(rawData);
@@ -126,6 +127,10 @@ namespace G3Archive
             foreach(G3Pak_FileTableEntry Entry in DirectoryEntry.DirTable)
             {
                 string FileName = string.Join("", Entry.DirectoryEntry.FileName.Data);
+
+                // Skip "_deleted" directories if ExcludeDeleted is enabled.
+                if (ParsedOptions.ExcludeDeleted && FileName.StartsWith("_deleted")) { continue; }
+
                 Directory.CreateDirectory(Path.Combine(Dest, FileName));
                 Entry.ExtractDirectory(Read, Dest, true).Wait(); // Extract child folders recursively
             }
@@ -133,6 +138,10 @@ namespace G3Archive
             List<Task> tasks = new List<Task>();
             foreach (G3Pak_FileTableEntry Entry in DirectoryEntry.FileTable)
             {
+                // Skip "_deleted" files if ExcludeDeleted is enabled.
+                if (ParsedOptions.ExcludeDeleted && ((Header.Attributes & (uint)G3Pak_FileAttribute.Deleted) > 0 || 
+                    string.Join("", Entry.FileEntry.FileName.Data).StartsWith("_deleted"))) { continue; }
+                
                 tasks.Add(Entry.ExtractFile(Read, Dest));
             }
             await Task.WhenAll(tasks);

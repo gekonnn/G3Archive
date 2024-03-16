@@ -43,8 +43,19 @@
 
             if ((file.Attributes & FileAttributes.Directory) > 0)
             {
-                string[] FileEntries = Directory.GetFiles(file.FullName);
-                string[] DirectoryEntries = Directory.GetDirectories(file.FullName);
+                string[] FileEntries;
+                string[] DirectoryEntries;
+
+                if (ParsedOptions.ExcludeDeleted)
+                {
+                    FileEntries = Directory.GetFiles(file.FullName).Where(x => !x.Contains("_deleted")).ToArray();
+                    DirectoryEntries = Directory.GetDirectories(file.FullName).Where(x => !x.Contains("_deleted")).ToArray();
+                }
+                else
+                {
+                    FileEntries = Directory.GetFiles(file.FullName);
+                    DirectoryEntries = Directory.GetDirectories(file.FullName);
+                }
                 
                 DirCount = (uint)DirectoryEntries.Length;
                 DirTable = new G3Pak_FileTableEntry[DirCount];

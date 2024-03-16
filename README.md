@@ -14,19 +14,19 @@ G3Archive [options]
 ```
 ### Options:
 ```
---extract,  -e <path>   Extracts the selected archive
---pack,     -p <path>   Packages the selected folder into a PAK archive
---dest,     -d <path>   Specifies path of output file
---overwrite             Forces overwriting of existing files
---quiet                 Hides any output information
+--extract, -e      <path>   Extracts the selected archive
+--pack, -p         <path>   Packages the selected folder into a PAK archive
+--dest, -d         <path>   Specifies path of output file
+--exclude-deleted           Prevents files marked as deleted from being output
+--overwrite                 Forces overwriting of existing files
+--quiet                     Hides any output information
 ```
 ### Example:
 ```
-G3Archive --extract "C:\Program Files (x86)\Steam\steamapps\common\Gothic 3\Data\_compiledAnimation.pak"
+G3Archive --extract "C:\Program Files (x86)\Steam\steamapps\common\Gothic 3\Data\_compiledAnimation.pak" --overwrite
 ```
 # Dependencies
 - https://github.com/commandlineparser/commandline
 ## TODOs:
-- Drag and drop functionality
-- Packaging compression support
+- Packing compression support
 - GUI version
