@@ -9,6 +9,7 @@
         public UInt32 Compression;
         public G3Pak_FileString FileName;
         public G3Pak_FileString Comment;
+        public FileInfo? EntryFile;
 
         public G3Pak_FileEntry(ReadBinary Read)
         {
@@ -21,18 +22,19 @@
             Comment = new G3Pak_FileString(Read);
         }
 
-        public G3Pak_FileEntry(BinaryWriter bw, FileInfo file, FileInfo RootDirectory, UInt64 OffsetToFiles, string Comment = "")
+        public G3Pak_FileEntry(BinaryWriter bw, FileInfo file, FileInfo RootDirectory, UInt64 OffsetToFiles, uint Compression = 0, string Comment = "")
         {
             this.Offset = OffsetToFiles;
             this.Bytes = (uint)file.Length;
             this.Size = (uint)File.ReadAllBytes(file.FullName).Length;
             this.Encryption = 0;
-            this.Compression = 0; // TODO: compression support
+            this.Compression = Compression;
             this.FileName = new G3Pak_FileString(bw, Path.GetRelativePath(RootDirectory.FullName, file.FullName));
             this.Comment = new G3Pak_FileString(bw, Comment);
+            this.EntryFile = file;
         }
 
-        public void Write(BinaryWriter bw)
+        public void WriteEntry(BinaryWriter bw)
         {
             bw.Write(Offset);
             bw.Write(Bytes);

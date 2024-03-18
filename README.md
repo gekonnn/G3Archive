@@ -26,7 +26,7 @@ G3Archive [options]
 G3Archive --extract "C:\Program Files (x86)\Steam\steamapps\common\Gothic 3\Data\_compiledAnimation.pak" --overwrite
 ```
 # Dependencies
-- https://github.com/commandlineparser/commandline
+- [CommandLineParser](https://github.com/commandlineparser/commandline)
+- [DotNetZip.Semverd](https://github.com/haf/DotNetZip.Semverd)
 ## TODOs:
-- Packing compression support
 - GUI version

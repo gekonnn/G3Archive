@@ -72,12 +72,12 @@
 
                 for (int i = 0; i < FileCount; i++)
                 {
-                    FileInfo _File = new FileInfo(FileEntries[i]);
-                    Logger.Log(string.Format("Writing data for {0}", _File.Name));
+                    FileInfo packedFile = new FileInfo(FileEntries[i]);
+                    Logger.Log(string.Format("Writing data for {0}", packedFile.Name));
                     uint OffsetToData = (uint)bw.BaseStream.Position;
-                    bw.Write(File.ReadAllBytes(_File.FullName));
                     
-                    G3Pak_FileTableEntry _fileTableEntry = new G3Pak_FileTableEntry(bw, _File, RootDirectory, OffsetToData);
+                    G3Pak_FileTableEntry _fileTableEntry = new G3Pak_FileTableEntry(bw, packedFile, RootDirectory, OffsetToData);
+                    _fileTableEntry.WriteData(bw, OffsetToData);
                     FileTable[i] = _fileTableEntry;
                 }
             }

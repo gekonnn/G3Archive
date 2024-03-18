@@ -1,6 +1,4 @@
-﻿using System.IO.Compression;
-
-namespace G3Archive
+﻿namespace G3Archive
 {
     public class G3Pak_FileTableEntry
     {   
@@ -56,37 +54,30 @@ namespace G3Archive
             }
             else // Write FileEntry
             {
-                FileEntry.Write(bw);
+                FileEntry.WriteEntry(bw);
             }
         }
 
-        private async Task<byte[]> Decompress(byte[] RawData)
+        public void WriteData(BinaryWriter bw, long Offset)
         {
-            string FileName = FileEntry.FileName.GetString();
-            
-            // Ensure the file has a valid zlib header
-            if (RawData[0] != 0x78) { 
-                Logger.Log("Incorrect zlib header for " + FileName);
-                return Array.Empty<byte>();
-            }
-
-            try
+            if (FileEntry.EntryFile != null)
             {
-                using (MemoryStream input = new MemoryStream(RawData))
-                using (MemoryStream output = new MemoryStream())
+                byte[] RawData = File.ReadAllBytes(FileEntry.EntryFile.FullName);
+                if (RawData.Length > (int)G3Pak_Compression.Threshold && !ZLibUtil.CompressionExcludedFileTypes.Contains(FileEntry.EntryFile.Extension))
                 {
-                    using (ZLibStream decompressionStream = new ZLibStream(input, CompressionMode.Decompress))
-                    {
-                        await decompressionStream.CopyToAsync(output);
+                    Header.Attributes += (int)G3Pak_FileAttribute.Compressed;
+                    FileEntry.Compression = (int)G3Pak_Compression.Zip;
+
+                    byte[] compressedData = ZLibUtil.Compress(RawData, FileEntry.FileName.GetString());
+                    if (compressedData.Length > 0)
+                    { 
+                        RawData = compressedData;
+                        FileEntry.Bytes = (UInt64)compressedData.Length;
                     }
-                    return output.ToArray();
                 }
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(string.Format("Decompression failed for {0} (Header = {1})", FileName, RawData[0].ToString("X2") + RawData[1].ToString("X2")));
-                Logger.Log("Exception: " + ex);
-                return Array.Empty<byte>();
+                
+                bw.BaseStream.Seek(Offset, SeekOrigin.Begin);
+                bw.Write(RawData);
             }
         }
 
@@ -97,18 +88,18 @@ namespace G3Archive
             Logger.Log(string.Format("Extracting {0} ({1} bytes)", FileName, FileEntry.Size));
 
             Read.fs.Seek(Convert.ToInt64(FileEntry.Offset), SeekOrigin.Begin);
-            int rawData_Bytes = (int)FileEntry.Bytes;
-            byte[] rawData = Read.Bytes(rawData_Bytes);
+            int RawData_Bytes = (int)FileEntry.Bytes;
+            byte[] RawData = Read.Bytes(RawData_Bytes);
 
             using (FileStream _fs = new FileStream(Path.Combine(Dest, FileName), FileMode.OpenOrCreate))
             {
                 if (FileEntry.Compression == (int)G3Pak_Compression.Zip)
                 {
-                    byte[] decompressedData = await Decompress(rawData);
-                    if (rawData.Length > 0) { rawData = decompressedData; }
+                    byte[] decompressedData = await ZLibUtil.Decompress(RawData, FileEntry.FileName.GetString());
+                    if (decompressedData.Length > 0) { RawData = decompressedData; }
                 }
 
-                await _fs.WriteAsync(rawData);
+                await _fs.WriteAsync(RawData);
                 await _fs.FlushAsync();
             }
         }
