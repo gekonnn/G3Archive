@@ -27,7 +27,7 @@ namespace G3Archive
 
             if (File.DirectoryName != null) { Directory.CreateDirectory(File.DirectoryName); }
             using (FileStream fs = new FileStream(File.FullName, FileMode.OpenOrCreate))
-            {
+            {    
                 Logger.Log("Writing header...");
                 BinaryWriter bw = new BinaryWriter(fs, Encoding.GetEncoding("iso-8859-1"));
                 Header = new G3Pak_ArchiveHeader(bw);

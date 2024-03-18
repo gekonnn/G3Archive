@@ -14,9 +14,10 @@ G3Archive [options]
 ```
 ### Options:
 ```
---extract, -e      <path>   Extracts the selected archive
---pack, -p         <path>   Packages the selected folder into a PAK archive
---dest, -d         <path>   Specifies path of output file
+--extract, -e       <path>  Extracts the selected archive
+--pack, -p          <path>  Packages the selected folder into a PAK archive
+--dest, -d          <path>  Specifies path of output file
+--compression       <0-9>   Specifies the compression level for compressed files
 --exclude-deleted           Prevents files marked as deleted from being output
 --overwrite                 Forces overwriting of existing files
 --quiet                     Hides any output information

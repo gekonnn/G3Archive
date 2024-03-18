@@ -1,23 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
-    <RootNamespace>src</RootNamespace>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <AssemblyName>$(MSBuildProjectName)</AssemblyName>
-	<AssemblyVersion>1.0.2</AssemblyVersion>
-	<FileVersion>1.0.2</FileVersion>
-	<Version>1.0.2</Version>
-    <Authors>gekoN</Authors>
-    <NeutralLanguage>en-US</NeutralLanguage>
-    <Product>$(AssemblyName)</Product>
-  </PropertyGroup>
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<TargetFramework>net7.0</TargetFramework>
+		<RootNamespace>src</RootNamespace>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<AssemblyName>$(MSBuildProjectName)</AssemblyName>
+		<AssemblyVersion>1.0.2</AssemblyVersion>
+		<FileVersion>1.0.2</FileVersion>
+		<Version>1.0.2</Version>
+		<Authors>gekoN</Authors>
+		<NeutralLanguage>en-US</NeutralLanguage>
+		<Product>$(AssemblyName)</Product>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.9.1" />
-    <PackageReference Include="DotNetZip" Version="1.16.0" />
-  </ItemGroup>
+<ItemGroup>
+	<PackageReference Include="CommandLineParser" Version="2.9.1" />
+	<PackageReference Include="DotNetZip" Version="1.16.0" />
+</ItemGroup>
   
 </Project>

@@ -53,12 +53,13 @@ namespace G3Archive
                 string Destination = Path.Combine(o.Destination ?? Directory.GetCurrentDirectory(), "");
                 
                 // Store options in a separate static class
-                ParsedOptions.Extract = o.Extract;
-                ParsedOptions.Pack = o.Pack;
-                ParsedOptions.Destination = Destination;
-                ParsedOptions.ExcludeDeleted = o.ExcludeDeleted;
-                ParsedOptions.Overwrite = o.Overwrite;
-                ParsedOptions.Quiet = o.Quiet;
+                ParsedOptions.Extract           = o.Extract;
+                ParsedOptions.Pack              = o.Pack;
+                ParsedOptions.Destination       = Destination;
+                ParsedOptions.Compression       = o.Compression;
+                ParsedOptions.ExcludeDeleted    = o.ExcludeDeleted;
+                ParsedOptions.Overwrite         = o.Overwrite;
+                ParsedOptions.Quiet             = o.Quiet;
 
                 Logger.Quiet = o.Quiet;
 

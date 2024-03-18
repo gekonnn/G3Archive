@@ -10,6 +10,8 @@ namespace G3Archive
         public FileInfo? Pack { get; set; }
         [Option('d', "dest", Required = false, HelpText = "Specifies path of output file")]
         public string? Destination { get; set; }
+        [Option("compression", Required = false, Default = 3, HelpText = "Specifies the compression level for compressed files (0-9)")]
+        public int Compression { get; set; }
         [Option("exclude-deleted", Required = false, Default = false, HelpText = "Prevents files marked as deleted from being output")]
         public bool ExcludeDeleted { get; set; }
         [Option("overwrite", Required = false, Default = false, HelpText = "Forces overwriting of existing files")]
