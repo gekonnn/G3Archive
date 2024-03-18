@@ -1,5 +1,5 @@
 # G3Archive
-G3Archive is a Gothic 3 .pak archive extractor written entirely in C# based on NicoDE's G3Pak file format specification.
+G3Archive is a Gothic 3 .pak archive extractor and creator written entirely in C# based on NicoDE's G3Pak file format specification.
 
 > [!IMPORTANT]
 > G3Archive requires at least .NET 7.0 installed
