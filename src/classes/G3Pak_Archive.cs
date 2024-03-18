@@ -41,9 +41,12 @@ namespace G3Archive
                 Logger.Log("Writing entries...");
                 RootEntry.WriteEntry(bw);
 
-                // Write offset to volume
-                ulong OffsetToVolume = (ulong)bw.BaseStream.Position - 4;
+                ulong FileSize = (ulong)bw.BaseStream.Position;
+                ulong OffsetToVolume = FileSize - 4; // Write offset to volume
+
                 Header.WriteOffsets(bw, OffsetToFiles, OffsetToFolders, OffsetToVolume);
+
+                fs.SetLength((long)FileSize);
             }
             return true;
         }
