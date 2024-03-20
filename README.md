@@ -29,6 +29,6 @@ G3Archive --extract "C:\Program Files (x86)\Steam\steamapps\common\Gothic 3\Data
 ```
 # Dependencies
 - [CommandLineParser](https://github.com/commandlineparser/commandline)
-- [DotNetZip.Semverd](https://github.com/haf/DotNetZip.Semverd)
+- [Zlib.Portable](https://github.com/CloudNimble/Zlib.Portable)
 ## TODOs:
 - GUI version
