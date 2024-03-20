@@ -37,9 +37,16 @@ namespace G3Archive
 
         static void Main(string[] args)
         {
-            if (args.Length == 1 && File.Exists(args[0]))
+            if (args.Length == 1)
             {
-                args = new[] { args[0], "-e" };
+                if (File.Exists(args[0]))
+                {
+                    args = new[] { args[0], "-e" };
+                }
+                else if (Directory.Exists(args[0]))
+                {
+                    args = new[] { args[0], "-p" };
+                }
             }
 
             if (args.Length == 0)
