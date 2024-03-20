@@ -34,6 +34,18 @@
             this.EntryFile = file;
         }
 
+        public byte[] ReadBytes()
+        {
+            if (EntryFile != null)
+            {
+                return File.ReadAllBytes(EntryFile.FullName);
+            }
+            else
+            {
+                return new byte[] { };
+            }
+        }
+
         public void WriteEntry(BinaryWriter bw)
         {
             bw.Write(Offset);

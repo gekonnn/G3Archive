@@ -62,7 +62,7 @@
         {
             if (FileEntry.EntryFile != null)
             {
-                byte[] RawData = File.ReadAllBytes(FileEntry.EntryFile.FullName);
+                byte[] RawData = FileEntry.ReadBytes();
                 if (RawData.Length > (int)G3Pak_Compression.Threshold && !ZLibUtil.CompressionExcludedFileTypes.Contains(FileEntry.EntryFile.Extension))
                 {
                     Header.Attributes += (int)G3Pak_FileAttribute.Compressed;
