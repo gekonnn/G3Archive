@@ -46,7 +46,7 @@
                 string[] FileEntries;
                 string[] DirectoryEntries;
 
-                if (ParsedOptions.ExcludeDeleted)
+                if (ParsedOptions.NoDeleted)
                 {
                     FileEntries = Directory.GetFiles(file.FullName).Where(x => !x.Contains("_deleted")).ToArray();
                     DirectoryEntries = Directory.GetDirectories(file.FullName).Where(x => !x.Contains("_deleted")).ToArray();

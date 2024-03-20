@@ -57,7 +57,8 @@ namespace G3Archive
                 ParsedOptions.Pack              = o.Pack;
                 ParsedOptions.Destination       = Destination;
                 ParsedOptions.Compression       = o.Compression;
-                ParsedOptions.ExcludeDeleted    = o.ExcludeDeleted;
+                ParsedOptions.NoDecompress      = o.NoDecompress;
+                ParsedOptions.NoDeleted         = o.NoDeleted;
                 ParsedOptions.Overwrite         = o.Overwrite;
                 ParsedOptions.Quiet             = o.Quiet;
 

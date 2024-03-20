@@ -12,8 +12,10 @@ namespace G3Archive
         public string? Destination { get; set; }
         [Option("compression", Required = false, Default = 3, HelpText = "Specifies the compression level for compressed files (0-9)")]
         public int Compression { get; set; }
-        [Option("exclude-deleted", Required = false, Default = false, HelpText = "Prevents files marked as deleted from being output")]
-        public bool ExcludeDeleted { get; set; }
+        [Option("no-decompress", Required = false, Default = false, HelpText = "Prevents files from decompressing when extracting")]
+        public bool NoDecompress { get; set; }
+        [Option("no-deleted", Required = false, Default = false, HelpText = "Prevents files marked as deleted from being output")]
+        public bool NoDeleted { get; set; }
         [Option("overwrite", Required = false, Default = false, HelpText = "Forces overwriting of existing files")]
         public bool Overwrite { get; set; }
         [Option("quiet", Required = false, Default = false, HelpText = "Hides any output information")]
