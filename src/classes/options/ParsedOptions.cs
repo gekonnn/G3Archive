@@ -2,13 +2,14 @@
 {
     public static class ParsedOptions
     {
-        public static FileInfo? Extract;
-        public static FileInfo? Pack;
+        public static FileInfo Path         = default!;
+        public static bool Extract;
+        public static bool Pack;
         public static string Destination    = default!;
-        public static int Compression       = default!;
-        public static bool NoDecompress     = default!;
-        public static bool NoDeleted        = default!;
-        public static bool Overwrite        = default!;
-        public static bool Quiet            = default!;
+        public static int Compression;
+        public static bool NoDecompress;
+        public static bool NoDeleted;
+        public static bool Overwrite;
+        public static bool Quiet;
     }
 }

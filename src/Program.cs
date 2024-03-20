@@ -37,42 +37,46 @@ namespace G3Archive
 
         static void Main(string[] args)
         {
+            if (args.Length == 1 && File.Exists(args[0]))
+            {
+                args = new[] { args[0], "-e" };
+            }
+
             if (args.Length == 0)
             {
                 args = new[] { "--help" };
             }
 
-            if (File.Exists(args[0]))
-            {
-                args = new[] { "-e", args[0] };
-            }
-
             Parser.Default.ParseArguments<Options>(args)
             .WithParsed<Options>(o =>
             {
-                string Destination = Path.Combine(o.Destination ?? Directory.GetCurrentDirectory(), "");
-                
-                // Store options in a separate static class
-                ParsedOptions.Extract           = o.Extract;
-                ParsedOptions.Pack              = o.Pack;
-                ParsedOptions.Destination       = Destination;
-                ParsedOptions.Compression       = o.Compression;
-                ParsedOptions.NoDecompress      = o.NoDecompress;
-                ParsedOptions.NoDeleted         = o.NoDeleted;
-                ParsedOptions.Overwrite         = o.Overwrite;
-                ParsedOptions.Quiet             = o.Quiet;
-
-                Logger.Quiet = o.Quiet;
-
-                if (o.Extract != null)
+                if(o.Path != null)
                 {
-                    if (Destination == Directory.GetCurrentDirectory()) { ParsedOptions.Destination = Path.Combine(Destination, Path.GetFileNameWithoutExtension(o.Extract.FullName)); }
-                    Extract(o.Extract).Wait();
-                }
-                if (o.Pack != null)
-                {
-                    if (Destination == Directory.GetCurrentDirectory()) { ParsedOptions.Destination = Path.Combine(Destination, o.Pack.Name + ".pak"); }
-                    Pack(o.Pack);
+                    string Destination = Path.Combine(o.Destination ?? Directory.GetCurrentDirectory(), "");
+
+                    // Store options in a separate static class
+                    ParsedOptions.Path = o.Path;
+                    ParsedOptions.Extract = o.Extract;
+                    ParsedOptions.Pack = o.Pack;
+                    ParsedOptions.Destination = Destination;
+                    ParsedOptions.Compression = o.Compression;
+                    ParsedOptions.NoDecompress = o.NoDecompress;
+                    ParsedOptions.NoDeleted = o.NoDeleted;
+                    ParsedOptions.Overwrite = o.Overwrite;
+                    ParsedOptions.Quiet = o.Quiet;
+
+                    Logger.Quiet = o.Quiet;
+
+                    if (o.Extract)
+                    {
+                        if (Destination == Directory.GetCurrentDirectory()) { ParsedOptions.Destination = Path.Combine(Destination, Path.GetFileNameWithoutExtension(o.Path.FullName)); }
+                        Extract(o.Path).Wait();
+                    }
+                    if (o.Pack)
+                    {
+                        if (Destination == Directory.GetCurrentDirectory()) { ParsedOptions.Destination = Path.Combine(Destination, o.Path.Name + ".pak"); }
+                        Pack(o.Path);
+                    }
                 }
             });
             
