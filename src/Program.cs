@@ -25,6 +25,8 @@ namespace G3Archive
 
         static void Pack(FileInfo directory)
         {
+            if (!File.Exists(directory.FullName)) { Logger.Log("Specified directory does not exist"); return; }
+
             Stopwatch sw = new Stopwatch();
             sw.Start();
 
