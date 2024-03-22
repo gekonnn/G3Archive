@@ -30,7 +30,9 @@ namespace G3Archive
             {    
                 Logger.Log("Writing header...");
                 BinaryWriter bw = new BinaryWriter(fs, Encoding.GetEncoding("iso-8859-1"));
-                Header = new G3Pak_ArchiveHeader(bw);
+                
+                Header = new G3Pak_ArchiveHeader();
+                Header.Write(bw);
                 
                 G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(bw, file, file);
                 
