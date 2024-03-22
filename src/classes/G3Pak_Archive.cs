@@ -5,14 +5,14 @@ namespace G3Archive
     public class G3Pak_Archive
     {
         public FileInfo? File;
-        private G3Pak_ArchiveHeader Header = default!;
+        private G3Pak_Archive_Header Header = default!;
         private ReadBinary Read = default!;
 
         public void ReadArchive(FileInfo file)
         {
             File = file;
             Read = new ReadBinary(new FileStream(file.FullName, FileMode.Open, FileAccess.Read));
-            Header = new G3Pak_ArchiveHeader(Read);
+            Header = new G3Pak_Archive_Header(Read);
         }
 
         public bool WriteArchive(FileInfo file, string Dest)
@@ -31,7 +31,7 @@ namespace G3Archive
                 Logger.Log("Writing header...");
                 BinaryWriter bw = new BinaryWriter(fs, Encoding.GetEncoding("iso-8859-1"));
                 
-                Header = new G3Pak_ArchiveHeader();
+                Header = new G3Pak_Archive_Header();
                 Header.Write(bw);
                 
                 G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(bw, file, file);

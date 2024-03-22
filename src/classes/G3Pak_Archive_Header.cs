@@ -1,6 +1,6 @@
 ﻿namespace G3Archive
 {
-    public class G3Pak_ArchiveHeader
+    public class G3Pak_Archive_Header
     {
         private readonly int magic = 0x30563347;
         
@@ -18,7 +18,7 @@
         public long Pos_OffsetToFolders;
         public long Pos_OffsetToVolume;
 
-        public G3Pak_ArchiveHeader(ReadBinary Read)
+        public G3Pak_Archive_Header(ReadBinary Read)
         {
             Version = Read.UInt32();
             Product = Read.UInt32();
@@ -39,7 +39,7 @@
             OffsetToVolume      = Read.UInt64();
         }
 
-        public G3Pak_ArchiveHeader()
+        public G3Pak_Archive_Header()
         {
             this.Version        = 0;
             this.Product        = (uint)magic;
