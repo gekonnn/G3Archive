@@ -38,14 +38,14 @@
             OffsetToVolume = Read.UInt64();
         }
 
-        public G3Pak_ArchiveHeader(BinaryWriter bw, uint Version = 0, uint Revision = 0, uint Encryption = 0, uint Compression = 0, uint Reserved = 0)
+        public G3Pak_ArchiveHeader(BinaryWriter bw)
         {
-            this.Version = Version;
+            this.Version = 0;
             this.Product = (uint)magic;
-            this.Revision = Revision;
-            this.Encryption = Encryption;
-            this.Compression = Compression;
-            this.Reserved = Reserved;
+            this.Revision = 0;
+            this.Encryption = 0;
+            this.Compression = ParsedOptions.Compression > 0 ? (uint)G3Pak_Compression.Auto : 0; // Set compression to Auto if not disabled
+            this.Reserved = 0;
 
             bw.Write(Version);
             bw.Write(Product);
