@@ -109,7 +109,7 @@
             if (Directory.Exists(Dest) && !Overwrite)
             {
                 Logger.Log(string.Format("Warning: Directory named {0} already exists.\nConsider renaming the directory or using \"--overwrite\" option", 
-                           Path.GetFileName(Dest)));
+                           Path.GetDirectoryName(Dest)));
                 return false;
             }
 
