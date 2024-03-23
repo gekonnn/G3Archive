@@ -15,9 +15,15 @@ namespace G3Archive
             Header = new G3Pak_Archive_Header(Read);
         }
 
-        public bool WriteArchive(FileInfo file, string Dest)
+        public bool WriteArchive(FileInfo Folder, string Dest)
         {
             File = new FileInfo(Dest);
+
+            if (File.FullName == Folder.FullName)
+            {
+                Logger.Log(string.Format("Warning: Destination path cannot be the same as packed folder's path"));
+                return false;
+            }
 
             if (File.Exists && !ParsedOptions.Overwrite)
             {
@@ -34,7 +40,7 @@ namespace G3Archive
                 Header = new G3Pak_Archive_Header();
                 Header.Write(bw);
                 
-                G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(bw, file, file);
+                G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(bw, Folder, Folder);
                 
                 ulong OffsetToFiles = (ulong)bw.BaseStream.Position;
                 ulong OffsetToFolders = OffsetToFiles;
