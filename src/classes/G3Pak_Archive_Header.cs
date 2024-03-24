@@ -2,7 +2,7 @@
 {
     public class G3Pak_Archive_Header
     {
-        private readonly int magic = 0x30563347;
+        private readonly uint magic = 0x30563347;
         
         public UInt32 Version;
         public UInt32 Product;
@@ -42,7 +42,7 @@
         public G3Pak_Archive_Header()
         {
             this.Version        = 0;
-            this.Product        = (uint)magic;
+            this.Product        = magic;
             this.Revision       = 0;
             this.Encryption     = 0;
             this.Compression    = ParsedOptions.Compression > 0 ? (uint)G3Pak_Compression.Auto : 0; // Set compression to Auto if not disabled

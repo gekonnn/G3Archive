@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.IO;
+using System.Text;
 
 namespace G3Archive
 {
@@ -10,9 +11,17 @@ namespace G3Archive
 
         public void ReadArchive(FileInfo file)
         {
-            File = file;
-            Read = new ReadBinary(new FileStream(file.FullName, FileMode.Open, FileAccess.Read));
-            Header = new G3Pak_Archive_Header(Read);
+            try
+            {
+                File = file;
+                Read = new ReadBinary(new FileStream(file.FullName, FileMode.Open, FileAccess.Read));
+                Header = new G3Pak_Archive_Header(Read);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error has occured whilst reading {file.Name}: \n\"{ex.Message}\"");
+            }
+
         }
 
         public bool WriteArchive(FileInfo Folder, string Dest)
@@ -32,39 +41,61 @@ namespace G3Archive
             }
 
             if (File.DirectoryName != null) { Directory.CreateDirectory(File.DirectoryName); }
-            using (FileStream fs = new FileStream(File.FullName, FileMode.OpenOrCreate))
-            {    
-                Logger.Log("Writing header...");
-                BinaryWriter bw = new BinaryWriter(fs, Encoding.GetEncoding("iso-8859-1"));
-                
-                Header = new G3Pak_Archive_Header();
-                Header.Write(bw);
-                
-                G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(bw, Folder, Folder);
-                
-                ulong OffsetToFiles = (ulong)bw.BaseStream.Position;
-                ulong OffsetToFolders = OffsetToFiles;
+            try
+            {
+                using (FileStream fs = new FileStream(File.FullName, FileMode.OpenOrCreate))
+                {
+                    Logger.Log("Writing header...");
+                    BinaryWriter bw = new BinaryWriter(fs, Encoding.GetEncoding("iso-8859-1"));
 
-                // Write file entries
-                Logger.Log("Writing entries...");
-                RootEntry.WriteEntry(bw);
+                    Header = new G3Pak_Archive_Header();
+                    Header.Write(bw);
 
-                ulong FileSize = (ulong)bw.BaseStream.Position;
-                ulong OffsetToVolume = FileSize - 4; // Write offset to volume
+                    G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(bw, Folder, Folder);
 
-                Header.WriteOffsets(bw, OffsetToFiles, OffsetToFolders, OffsetToVolume);
+                    ulong OffsetToFiles = (ulong)bw.BaseStream.Position;
+                    ulong OffsetToFolders = OffsetToFiles;
 
-                fs.SetLength((long)FileSize);
+                    // Write file entries
+                    Logger.Log("Writing entries...");
+                    RootEntry.WriteEntry(bw);
+
+                    ulong FileSize = (ulong)bw.BaseStream.Position;
+                    ulong OffsetToVolume = FileSize - 4; // Write offset to volume
+
+                    Header.WriteOffsets(bw, OffsetToFiles, OffsetToFolders, OffsetToVolume);
+
+                    fs.SetLength((long)FileSize);
+                }
+                return true;
             }
-            return true;
+            catch (Exception ex)
+            {
+                throw new Exception($"An error has occured whilst writing to {this.File!.Name}: \n\"{ex.Message}\"");
+            }
+            
         }
 
         public async Task<bool> Extract(string Dest)
         {
-            Read.fs.Seek((long)Header.OffsetToFiles, SeekOrigin.Begin);
-            G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(Read);
-            bool success = await RootEntry.ExtractDirectory(Read, Dest, ParsedOptions.Overwrite);
-            return success;
+            try
+            {
+                if (File != null)
+                {
+                    Read.fs.Seek((long)Header.OffsetToFiles, SeekOrigin.Begin);
+                    G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(Read);
+                    bool success = await RootEntry.ExtractDirectory(Read, Dest, ParsedOptions.Overwrite);
+                    return success;
+                }
+                else
+                {
+                    throw new ArgumentNullException("Archive header not assigned");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An error has occured whilst extracting {this.File!.Name}: \n\"{ex.Message}\"");
+            }
         }
     }
 }

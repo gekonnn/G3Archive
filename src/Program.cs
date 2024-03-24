@@ -9,32 +9,48 @@ namespace G3Archive
         {
             if (!File.Exists(file.FullName)) { Logger.Log("Specified file does not exist"); return; }
 
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+            try
+            {
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
 
-            Logger.Log("Reading archive header...");
-            G3Pak_Archive PakFile = new G3Pak_Archive();
-            PakFile.ReadArchive(file);
+                Logger.Log("Reading archive header...");
+                G3Pak_Archive PakFile = new G3Pak_Archive();
+                PakFile.ReadArchive(file);
 
-            Logger.Log("Extracting archive...");
-            bool success = await PakFile.Extract(ParsedOptions.Destination);
+                Logger.Log("Extracting archive...");
+                bool success = await PakFile.Extract(ParsedOptions.Destination);
 
-            sw.Stop();
-            if (success) { Logger.Log(string.Format("{0} extracted successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
+                sw.Stop();
+                if (success) { Logger.Log(string.Format("{0} extracted successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(ex.Message);
+                return;
+            }
         }
 
         static void Pack(FileInfo directory)
         {
             if (!Directory.Exists(directory.FullName)) { Logger.Log("Specified directory does not exist"); return; }
+            
+            try
+            {
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
 
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+                G3Pak_Archive PakFile = new G3Pak_Archive();
+                bool success = PakFile.WriteArchive(directory, ParsedOptions.Destination);
 
-            G3Pak_Archive PakFile = new G3Pak_Archive();
-            bool success = PakFile.WriteArchive(directory, ParsedOptions.Destination);
-
-            sw.Stop();
-            if (success) { Logger.Log(string.Format("{0} packed successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
+                sw.Stop();
+                if (success) { Logger.Log(string.Format("{0} packed successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(ex.Message);
+                return;
+            }
         }
 
         static void Main(string[] args)
