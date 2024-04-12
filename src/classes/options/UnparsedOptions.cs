@@ -2,7 +2,7 @@
 
 namespace G3Archive
 {
-    public class Options
+    public class UnparsedOptions
     {
         [Value(0)]
         public FileInfo? Path { get; set; }

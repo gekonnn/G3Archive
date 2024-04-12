@@ -72,8 +72,8 @@ namespace G3Archive
                 args = new[] { "--help" };
             }
 
-            Parser.Default.ParseArguments<Options>(args)
-            .WithParsed<Options>(o =>
+            Parser.Default.ParseArguments<UnparsedOptions>(args)
+            .WithParsed<UnparsedOptions>(o =>
             {
                 if(o.Path != null)
                 {
