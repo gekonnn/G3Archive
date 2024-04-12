@@ -15,11 +15,11 @@ namespace G3Archive
 
             try
             {
-                Stopwatch sw = new Stopwatch();
+                Stopwatch sw = new();
                 sw.Start();
 
                 Logger.Log("Reading archive header...");
-                G3Pak_Archive PakFile = new G3Pak_Archive();
+                G3Pak_Archive PakFile = new();
                 PakFile.ReadArchive(file);
 
                 Logger.Log("Extracting archive...");
@@ -49,10 +49,10 @@ namespace G3Archive
             
             try
             {
-                Stopwatch sw = new Stopwatch();
+                Stopwatch sw = new();
                 sw.Start();
 
-                G3Pak_Archive PakFile = new G3Pak_Archive();
+                G3Pak_Archive PakFile = new();
                 bool success = PakFile.WriteArchive(directory, Options.Destination);
 
                 sw.Stop();

@@ -4,18 +4,18 @@ namespace G3Archive
 {
     public class ZLibUtil
     {
-        public static List<string> CompressionExcludedFileTypes = new List<string> { ".dds", ".xlip", ".ogg", ".wav" };
-        private static CompressionLevel[] compressionLevels = {
-            Ionic.Zlib.CompressionLevel.Level0,
-            Ionic.Zlib.CompressionLevel.Level1,
-            Ionic.Zlib.CompressionLevel.Level2,
-            Ionic.Zlib.CompressionLevel.Level3,
-            Ionic.Zlib.CompressionLevel.Level4,
-            Ionic.Zlib.CompressionLevel.Level5,
-            Ionic.Zlib.CompressionLevel.Level6,
-            Ionic.Zlib.CompressionLevel.Level7,
-            Ionic.Zlib.CompressionLevel.Level8,
-            Ionic.Zlib.CompressionLevel.Level9
+        public static List<string> CompressionExcludedFileTypes = new() { ".dds", ".xlip", ".ogg", ".wav" };
+        private static readonly CompressionLevel[] compressionLevels = {
+            CompressionLevel.Level0,
+            CompressionLevel.Level1,
+            CompressionLevel.Level2,
+            CompressionLevel.Level3,
+            CompressionLevel.Level4,
+            CompressionLevel.Level5,
+            CompressionLevel.Level6,
+            CompressionLevel.Level7,
+            CompressionLevel.Level8,
+            CompressionLevel.Level9
         };
 
         public static async Task<byte[]> Decompress(byte[] RawData, string FileName = "")
@@ -29,15 +29,14 @@ namespace G3Archive
 
             try
             {
-                using (MemoryStream input = new MemoryStream(RawData))
-                using (MemoryStream output = new MemoryStream())
+                using MemoryStream input = new(RawData);
+                using MemoryStream output = new();
+                using (ZlibStream decompressionStream = new(input, CompressionMode.Decompress))
                 {
-                    using (ZlibStream decompressionStream = new ZlibStream(input, Ionic.Zlib.CompressionMode.Decompress))
-                    {
-                        await decompressionStream.CopyToAsync(output);
-                    }
-                    return output.ToArray();
+                    await decompressionStream.CopyToAsync(output);
                 }
+
+                return output.ToArray();
             }
             catch (Exception ex)
             {
@@ -52,14 +51,12 @@ namespace G3Archive
             try
             {
                 CompressionLevel compressionLevel = compressionLevels[Math.Min(Math.Max(Options.Compression, 0), compressionLevels.Length - 1)];
-                using (MemoryStream outputStream = new MemoryStream())
+                using MemoryStream outputStream = new();
+                using (ZlibStream compressionStream = new(outputStream, CompressionMode.Compress, compressionLevel))
                 {
-                    using (ZlibStream compressionStream = new ZlibStream(outputStream, Ionic.Zlib.CompressionMode.Compress, compressionLevel))
-                    {
-                        compressionStream.Write(RawData, 0, RawData.Length);
-                    }
-                    return outputStream.ToArray();
+                    compressionStream.Write(RawData, 0, RawData.Length);
                 }
+                return outputStream.ToArray();
             }
             catch (Exception ex)
             {

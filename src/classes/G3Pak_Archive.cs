@@ -21,7 +21,7 @@ namespace G3Archive
             }
             catch (Exception ex)
             {
-                throw new Exception($"An error has occured whilst reading {file.Name}: \n\"{ex.Message}\"");
+                throw new($"An error has occured whilst reading {file.Name}: \n\"{ex.Message}\"");
             }
 
         }
@@ -46,36 +46,34 @@ namespace G3Archive
 
             try
             {
-                using (FileStream _fs = new FileStream(File.FullName, FileMode.OpenOrCreate))
-                {
-                    Logger.Log("Writing header...");
+                using FileStream _fs = new(File.FullName, FileMode.OpenOrCreate);
+                using BinaryWriter _bw = new(_fs, Encoding.GetEncoding("iso-8859-1"));
 
-                    BinaryWriter _bw = new BinaryWriter(_fs, Encoding.GetEncoding("iso-8859-1"));
+                Logger.Log("Writing header...");
 
-                    Header = new G3Pak_Archive_Header();
-                    Header.Write(_bw);
+                Header = new G3Pak_Archive_Header();
+                Header.Write(_bw);
 
-                    G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(_bw, Folder, Folder);
+                G3Pak_FileTableEntry RootEntry = new(_bw, Folder, Folder);
 
-                    ulong OffsetToFiles = (ulong)_fs.Position;
-                    ulong OffsetToFolders = OffsetToFiles;
+                ulong OffsetToFiles = (ulong)_fs.Position;
+                ulong OffsetToFolders = OffsetToFiles;
 
-                    // Write file entries
-                    Logger.Log("Writing entries...");
-                    RootEntry.WriteEntry(_bw);
+                // Write file entries
+                Logger.Log("Writing entries...");
+                RootEntry.WriteEntry(_bw);
 
-                    ulong FileSize = (ulong)_fs.Position;
-                    ulong OffsetToVolume = FileSize - 4;
+                ulong FileSize = (ulong)_fs.Position;
+                ulong OffsetToVolume = FileSize - 4;
 
-                    Header.WriteOffsets(_bw, OffsetToFiles, OffsetToFolders, OffsetToVolume);
+                Header.WriteOffsets(_bw, OffsetToFiles, OffsetToFolders, OffsetToVolume);
+                _fs.SetLength((long)FileSize);
 
-                    _fs.SetLength((long)FileSize);
-                }
                 return true;
             }
             catch (Exception ex)
             {
-                throw new Exception($"An error has occured whilst writing to {this.File!.Name}: \n\"{ex.Message}\"");
+                throw new($"An error has occured whilst writing to {this.File!.Name}: \n\"{ex.Message}\"");
             }
             
         }
@@ -87,18 +85,18 @@ namespace G3Archive
                 if (File != null)
                 {
                     fs.Seek((long)Header.OffsetToFiles, SeekOrigin.Begin);
-                    G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(br);
+                    G3Pak_FileTableEntry RootEntry = new(br);
                     bool success = await RootEntry.ExtractDirectory(br, Dest, Options.Overwrite);
                     return success;
                 }
                 else
                 {
-                    throw new Exception("Archive header not assigned");
+                    throw new("Archive header not assigned");
                 }
             }
             catch (Exception ex)
             {
-                throw new Exception($"An error has occured whilst extracting {this.File!.Name}: \n\"{ex.Message}\"");
+                throw new($"An error has occured whilst extracting {this.File!.Name}: \n\"{ex.Message}\"");
             }
         }
     }

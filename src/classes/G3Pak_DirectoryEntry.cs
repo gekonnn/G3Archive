@@ -16,7 +16,7 @@
             DirTable = new G3Pak_FileTableEntry[DirCount];
             for (int i_dir = 0; i_dir < DirCount; i_dir++)
             {
-                G3Pak_FileTableEntry _fileTableEntry = new G3Pak_FileTableEntry(br);
+                G3Pak_FileTableEntry _fileTableEntry = new(br);
                 DirTable[i_dir] = _fileTableEntry;
             }
 
@@ -24,7 +24,7 @@
             FileTable = new G3Pak_FileTableEntry[FileCount];
             for (int i_file = 0; i_file < FileCount; i_file++)
             {
-                G3Pak_FileTableEntry _fileTableEntry = new G3Pak_FileTableEntry(br);
+                G3Pak_FileTableEntry _fileTableEntry = new(br);
                 FileTable[i_file] = _fileTableEntry;
             }
         }
@@ -61,18 +61,18 @@
 
                 for(int i = 0; i < DirCount; i++)
                 {
-                    FileInfo Dir = new FileInfo(DirectoryEntries[i]);
-                    G3Pak_FileTableEntry _fileTableEntry = new G3Pak_FileTableEntry(bw, Dir, RootDirectory);
+                    FileInfo Dir = new(DirectoryEntries[i]);
+                    G3Pak_FileTableEntry _fileTableEntry = new(bw, Dir, RootDirectory);
                     DirTable[i] = _fileTableEntry;
                 }
 
                 for (int i = 0; i < FileCount; i++)
                 {
-                    FileInfo _File = new FileInfo(FileEntries[i]);
+                    FileInfo _File = new(FileEntries[i]);
                     Logger.Log(string.Format("Writing data for {0}", _File.Name));
                     uint OffsetToData = (uint)bw.BaseStream.Position;
                     
-                    G3Pak_FileTableEntry _fileTableEntry = new G3Pak_FileTableEntry(bw, _File, RootDirectory, OffsetToData);
+                    G3Pak_FileTableEntry _fileTableEntry = new(bw, _File, RootDirectory, OffsetToData);
                     _fileTableEntry.WriteData(bw, OffsetToData);
                     FileTable[i] = _fileTableEntry;
                 }

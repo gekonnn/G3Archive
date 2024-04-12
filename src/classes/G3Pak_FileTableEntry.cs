@@ -91,17 +91,15 @@
             int RawData_Bytes = (int)FileEntry.Bytes;
             byte[] RawData = br.ReadBytes(RawData_Bytes);
 
-            using (FileStream fs = new FileStream(Path.Combine(Dest, FileName), FileMode.OpenOrCreate))
+            using FileStream fs = new(Path.Combine(Dest, FileName), FileMode.OpenOrCreate);
+            if (FileEntry.Compression == (int)G3Pak_Compression.Zip && !Options.NoDecompress)
             {
-                if (FileEntry.Compression == (int)G3Pak_Compression.Zip && !Options.NoDecompress)
-                {
-                    byte[] decompressedData = await ZLibUtil.Decompress(RawData, FileEntry.FileName.GetString());
-                    if (decompressedData.Length > 0) RawData = decompressedData;
-                }
-
-                await fs.WriteAsync(RawData);
-                await fs.FlushAsync();
+                byte[] decompressedData = await ZLibUtil.Decompress(RawData, FileEntry.FileName.GetString());
+                if (decompressedData.Length > 0) RawData = decompressedData;
             }
+
+            await fs.WriteAsync(RawData);
+            await fs.FlushAsync();
         }
         
         public async Task<bool> ExtractDirectory(BinaryReader br, string Dest, bool Overwrite)
@@ -126,7 +124,7 @@
                 await Entry.ExtractDirectory(br, Dest, true); // Extract child folders recursively
             }
             
-            List<Task> tasks = new List<Task>();
+            List<Task> tasks = new();
             foreach (G3Pak_FileTableEntry Entry in DirectoryEntry.FileTable)
             {
                 // Skip "_deleted" files if NoDeleted is enabled.

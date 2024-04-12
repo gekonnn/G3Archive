@@ -24,7 +24,7 @@
             Product = br.ReadUInt32();
 
             // Check if file is a valid G3Pak archive (G3V0) 
-            if (Product != magic) throw new Exception("Specified file is not an G3Pak archive.");
+            if (Product != magic) throw new("Specified file is not an G3Pak archive.");
 
             Revision    = br.ReadUInt32();
             Encryption  = br.ReadUInt32();
