@@ -9,14 +9,14 @@
         public UInt32 FileSizeLow;
         public UInt32 Attributes;
 
-        public G3Pak_FileTableEntry_Header(ReadBinary Read)
+        public G3Pak_FileTableEntry_Header(BinaryReader br)
         {
-            FileTime1 = Read.UInt64();
-            FileTime2 = Read.UInt64();
-            FileTime3 = Read.UInt64();
-            FileSizeHigh = Read.UInt32();
-            FileSizeLow = Read.UInt32();
-            Attributes = Read.UInt32();
+            FileTime1       = br.ReadUInt64();
+            FileTime2       = br.ReadUInt64();
+            FileTime3       = br.ReadUInt64();
+            FileSizeHigh    = br.ReadUInt32();
+            FileSizeLow     = br.ReadUInt32();
+            Attributes      = br.ReadUInt32();
         }
 
         public G3Pak_FileTableEntry_Header(BinaryWriter bw, FileInfo File)

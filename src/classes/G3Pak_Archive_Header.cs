@@ -18,25 +18,25 @@
         public long Pos_OffsetToFolders;
         public long Pos_OffsetToVolume;
 
-        public G3Pak_Archive_Header(ReadBinary Read)
+        public G3Pak_Archive_Header(BinaryReader br)
         {
-            Version = Read.UInt32();
-            Product = Read.UInt32();
+            Version = br.ReadUInt32();
+            Product = br.ReadUInt32();
 
             // Check if file is a valid G3Pak archive (G3V0) 
             if (Product != magic) throw new Exception("Specified file is not an G3Pak archive.");
 
-            Revision    = Read.UInt32();
-            Encryption  = Read.UInt32();
-            Compression = Read.UInt32();
-            Reserved    = Read.UInt32();
+            Revision    = br.ReadUInt32();
+            Encryption  = br.ReadUInt32();
+            Compression = br.ReadUInt32();
+            Reserved    = br.ReadUInt32();
 
-            Pos_OffsetToFiles   = Read.fs.Position;
-            OffsetToFiles       = Read.UInt64();
-            Pos_OffsetToFolders = Read.fs.Position;
-            OffsetToFolders     = Read.UInt64();
-            Pos_OffsetToVolume  = Read.fs.Position;
-            OffsetToVolume      = Read.UInt64();
+            Pos_OffsetToFiles   = br.BaseStream.Position;
+            OffsetToFiles       = br.ReadUInt64();
+            Pos_OffsetToFolders = br.BaseStream.Position;
+            OffsetToFolders     = br.ReadUInt64();
+            Pos_OffsetToVolume  = br.BaseStream.Position;
+            OffsetToVolume      = br.ReadUInt64();
         }
 
         public G3Pak_Archive_Header()

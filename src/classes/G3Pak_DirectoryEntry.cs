@@ -8,23 +8,23 @@
         public G3Pak_FileTableEntry[] FileTable;
         public UInt32 FileCount;
 
-        public G3Pak_DirectoryEntry(ReadBinary Read)
+        public G3Pak_DirectoryEntry(BinaryReader br)
         {
-            FileName = new G3Pak_FileString(Read);
+            FileName = new G3Pak_FileString(br);
 
-            DirCount = Read.UInt32();
+            DirCount = br.ReadUInt32();
             DirTable = new G3Pak_FileTableEntry[DirCount];
             for (int i_dir = 0; i_dir < DirCount; i_dir++)
             {
-                G3Pak_FileTableEntry _fileTableEntry = new G3Pak_FileTableEntry(Read);
+                G3Pak_FileTableEntry _fileTableEntry = new G3Pak_FileTableEntry(br);
                 DirTable[i_dir] = _fileTableEntry;
             }
 
-            FileCount = Read.UInt32();
+            FileCount = br.ReadUInt32();
             FileTable = new G3Pak_FileTableEntry[FileCount];
             for (int i_file = 0; i_file < FileCount; i_file++)
             {
-                G3Pak_FileTableEntry _fileTableEntry = new G3Pak_FileTableEntry(Read);
+                G3Pak_FileTableEntry _fileTableEntry = new G3Pak_FileTableEntry(br);
                 FileTable[i_file] = _fileTableEntry;
             }
         }

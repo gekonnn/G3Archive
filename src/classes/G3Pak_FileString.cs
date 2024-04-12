@@ -3,20 +3,20 @@
     public class G3Pak_FileString
     {
         public UInt32 Length;
-        public char[] Data = new char[0];
+        public char[] Data = Array.Empty<char>();
 
-        public G3Pak_FileString(ReadBinary Read)
+        public G3Pak_FileString(BinaryReader br)
         {
-            Length = Read.UInt32();
+            Length = (uint)br.ReadInt32();
 
             if (Length > 0)
             {
                 Data = new char[Length];
                 for (int i = 0; i < Length; i++)
                 {
-                    Data[i] = Read.Char();
+                    Data[i] = br.ReadChar();
                 }
-                Read.Byte(); // one empty byte after the string
+                br.ReadByte(); // one empty byte after the string
             }
             else
             {
@@ -35,7 +35,7 @@
             }
             else
             {
-                Data = new char[0];
+                Data = Array.Empty<char>();
             }
         }
 

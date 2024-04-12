@@ -6,16 +6,16 @@
         public G3Pak_DirectoryEntry DirectoryEntry = default!;
         public G3Pak_FileEntry FileEntry = default!;
 
-        public G3Pak_FileTableEntry(ReadBinary Read)
+        public G3Pak_FileTableEntry(BinaryReader br)
         {
-            Header = new G3Pak_FileTableEntry_Header(Read);
+            Header = new G3Pak_FileTableEntry_Header(br);
             if ((Header.Attributes & (uint)G3Pak_FileAttribute.Directory) > 0)
             {
-                DirectoryEntry = new G3Pak_DirectoryEntry(Read);
+                DirectoryEntry = new G3Pak_DirectoryEntry(br);
             }
             else
             {
-                FileEntry = new G3Pak_FileEntry(Read);
+                FileEntry = new G3Pak_FileEntry(br);
             }
         }
 
@@ -81,17 +81,17 @@
             }
         }
 
-        public async Task ExtractFile(ReadBinary Read, string Dest)
+        public async Task ExtractFile(BinaryReader br, string Dest)
         {
             string FileName = FileEntry.FileName.GetString();
 
             Logger.Log(string.Format("Extracting {0} ({1} bytes)", FileName, FileEntry.Size));
 
-            Read.fs.Seek(Convert.ToInt64(FileEntry.Offset), SeekOrigin.Begin);
+            br.BaseStream.Seek(Convert.ToInt64(FileEntry.Offset), SeekOrigin.Begin);
             int RawData_Bytes = (int)FileEntry.Bytes;
-            byte[] RawData = Read.Bytes(RawData_Bytes);
+            byte[] RawData = br.ReadBytes(RawData_Bytes);
 
-            using (FileStream _fs = new FileStream(Path.Combine(Dest, FileName), FileMode.OpenOrCreate))
+            using (FileStream fs = new FileStream(Path.Combine(Dest, FileName), FileMode.OpenOrCreate))
             {
                 if (FileEntry.Compression == (int)G3Pak_Compression.Zip && !Options.NoDecompress)
                 {
@@ -99,12 +99,12 @@
                     if (decompressedData.Length > 0) RawData = decompressedData;
                 }
 
-                await _fs.WriteAsync(RawData);
-                await _fs.FlushAsync();
+                await fs.WriteAsync(RawData);
+                await fs.FlushAsync();
             }
         }
         
-        public async Task<bool> ExtractDirectory(ReadBinary Read, string Dest, bool Overwrite)
+        public async Task<bool> ExtractDirectory(BinaryReader br, string Dest, bool Overwrite)
         {
             if (Directory.Exists(Dest) && !Overwrite)
             {
@@ -123,7 +123,7 @@
                 if (Options.NoDeleted && FileName.StartsWith("_deleted")) continue;
 
                 Directory.CreateDirectory(Path.Combine(Dest, FileName));
-                await Entry.ExtractDirectory(Read, Dest, true); // Extract child folders recursively
+                await Entry.ExtractDirectory(br, Dest, true); // Extract child folders recursively
             }
             
             List<Task> tasks = new List<Task>();
@@ -134,7 +134,7 @@
                     Entry.FileEntry.FileName.GetString().StartsWith("_deleted"))) 
                 continue;
                 
-                tasks.Add(Entry.ExtractFile(Read, Dest));
+                tasks.Add(Entry.ExtractFile(br, Dest));
             }
             await Task.WhenAll(tasks);
 

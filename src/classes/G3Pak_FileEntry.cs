@@ -11,27 +11,27 @@
         public G3Pak_FileString Comment;
         public FileInfo? EntryFile;
 
-        public G3Pak_FileEntry(ReadBinary Read)
+        public G3Pak_FileEntry(BinaryReader br)
         {
-            Offset = Read.UInt64();
-            Bytes = Read.UInt64();
-            Size = Read.UInt64();
-            Encryption = Read.UInt32();
-            Compression = Read.UInt32();
-            FileName = new G3Pak_FileString(Read);
-            Comment = new G3Pak_FileString(Read);
+            Offset      = br.ReadUInt64();
+            Bytes       = br.ReadUInt64();
+            Size        = br.ReadUInt64();
+            Encryption  = br.ReadUInt32();
+            Compression = br.ReadUInt32();
+            FileName    = new G3Pak_FileString(br);
+            Comment     = new G3Pak_FileString(br);
         }
 
         public G3Pak_FileEntry(BinaryWriter bw, FileInfo file, FileInfo RootDirectory, UInt64 OffsetToFiles, uint Compression = 0, string Comment = "")
         {
-            this.Offset = OffsetToFiles;
-            this.Bytes = (uint)file.Length;
-            this.Size = (uint)File.ReadAllBytes(file.FullName).Length;
-            this.Encryption = 0;
-            this.Compression = Compression;
-            this.FileName = new G3Pak_FileString(bw, Path.GetRelativePath(RootDirectory.FullName, file.FullName));
-            this.Comment = new G3Pak_FileString(bw, Comment);
-            this.EntryFile = file;
+            this.Offset         = OffsetToFiles;
+            this.Bytes          = (uint)file.Length;
+            this.Size           = (uint)File.ReadAllBytes(file.FullName).Length;
+            this.Encryption     = 0;
+            this.Compression    = Compression;
+            this.FileName       = new G3Pak_FileString(bw, Path.GetRelativePath(RootDirectory.FullName, file.FullName));
+            this.Comment        = new G3Pak_FileString(bw, Comment);
+            this.EntryFile      = file;
         }
 
         public byte[] ReadBytes()
