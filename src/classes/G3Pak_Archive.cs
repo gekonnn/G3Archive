@@ -93,7 +93,7 @@ namespace G3Archive
                 }
                 else
                 {
-                    throw new ArgumentNullException("Archive header not assigned");
+                    throw new Exception("Archive header not assigned");
                 }
             }
             catch (Exception ex)
