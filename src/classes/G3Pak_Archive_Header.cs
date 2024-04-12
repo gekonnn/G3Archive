@@ -45,7 +45,7 @@
             this.Product        = magic;
             this.Revision       = 0;
             this.Encryption     = 0;
-            this.Compression    = ParsedOptions.Compression > 0 ? (uint)G3Pak_Compression.Auto : 0; // Set compression to Auto if not disabled
+            this.Compression    = Options.Compression > 0 ? (uint)G3Pak_Compression.Auto : 0; // Set compression to Auto if not disabled
             this.Reserved       = 0;
         }
 

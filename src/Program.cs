@@ -19,7 +19,7 @@ namespace G3Archive
                 PakFile.ReadArchive(file);
 
                 Logger.Log("Extracting archive...");
-                bool success = await PakFile.Extract(ParsedOptions.Destination);
+                bool success = await PakFile.Extract(Options.Destination);
 
                 sw.Stop();
                 if (success) { Logger.Log(string.Format("{0} extracted successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
@@ -41,7 +41,7 @@ namespace G3Archive
                 sw.Start();
 
                 G3Pak_Archive PakFile = new G3Pak_Archive();
-                bool success = PakFile.WriteArchive(directory, ParsedOptions.Destination);
+                bool success = PakFile.WriteArchive(directory, Options.Destination);
 
                 sw.Stop();
                 if (success) { Logger.Log(string.Format("{0} packed successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
@@ -80,26 +80,26 @@ namespace G3Archive
                     string Destination = Path.Combine(o.Destination ?? Directory.GetCurrentDirectory(), "");
 
                     // Store options in a separate static class
-                    ParsedOptions.Path = o.Path;
-                    ParsedOptions.Extract = o.Extract;
-                    ParsedOptions.Pack = o.Pack;
-                    ParsedOptions.Destination = Destination;
-                    ParsedOptions.Compression = o.Compression;
-                    ParsedOptions.NoDecompress = o.NoDecompress;
-                    ParsedOptions.NoDeleted = o.NoDeleted;
-                    ParsedOptions.Overwrite = o.Overwrite;
-                    ParsedOptions.Quiet = o.Quiet;
+                    Options.Path = o.Path;
+                    Options.Extract = o.Extract;
+                    Options.Pack = o.Pack;
+                    Options.Destination = Destination;
+                    Options.Compression = o.Compression;
+                    Options.NoDecompress = o.NoDecompress;
+                    Options.NoDeleted = o.NoDeleted;
+                    Options.Overwrite = o.Overwrite;
+                    Options.Quiet = o.Quiet;
 
                     Logger.Enabled = !o.Quiet;
 
                     if (o.Extract)
                     {
-                        if (Destination == Directory.GetCurrentDirectory()) { ParsedOptions.Destination = Path.Combine(Destination, Path.GetFileNameWithoutExtension(o.Path.FullName)); }
+                        if (Destination == Directory.GetCurrentDirectory()) { Options.Destination = Path.Combine(Destination, Path.GetFileNameWithoutExtension(o.Path.FullName)); }
                         Extract(o.Path).Wait();
                     }
                     if (o.Pack)
                     {
-                        if (Destination == Directory.GetCurrentDirectory()) { ParsedOptions.Destination = Path.Combine(Destination, o.Path.Name + ".pak"); }
+                        if (Destination == Directory.GetCurrentDirectory()) { Options.Destination = Path.Combine(Destination, o.Path.Name + ".pak"); }
                         Pack(o.Path);
                     }
                 }

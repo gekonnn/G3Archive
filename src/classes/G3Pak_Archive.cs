@@ -34,7 +34,7 @@ namespace G3Archive
                 return false;
             }
 
-            if (File.Exists && !ParsedOptions.Overwrite)
+            if (File.Exists && !Options.Overwrite)
             {
                 Logger.Log(string.Format("Warning: File named {0} already exists.\nConsider renaming the file or using the \"--overwrite\" option.", File.Name));
                 return false;
@@ -84,7 +84,7 @@ namespace G3Archive
                 {
                     Read.fs.Seek((long)Header.OffsetToFiles, SeekOrigin.Begin);
                     G3Pak_FileTableEntry RootEntry = new G3Pak_FileTableEntry(Read);
-                    bool success = await RootEntry.ExtractDirectory(Read, Dest, ParsedOptions.Overwrite);
+                    bool success = await RootEntry.ExtractDirectory(Read, Dest, Options.Overwrite);
                     return success;
                 }
                 else

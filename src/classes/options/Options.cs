@@ -1,6 +1,6 @@
 ﻿namespace G3Archive
 {
-    public static class ParsedOptions
+    public static class Options
     {
         public static FileInfo Path         = default!;
         public static bool Extract;

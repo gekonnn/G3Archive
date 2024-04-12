@@ -51,7 +51,7 @@ namespace G3Archive
         {
             try
             {
-                CompressionLevel compressionLevel = compressionLevels[Math.Min(Math.Max(ParsedOptions.Compression, 0), compressionLevels.Length - 1)];
+                CompressionLevel compressionLevel = compressionLevels[Math.Min(Math.Max(Options.Compression, 0), compressionLevels.Length - 1)];
                 using (MemoryStream outputStream = new MemoryStream())
                 {
                     using (ZlibStream compressionStream = new ZlibStream(outputStream, Ionic.Zlib.CompressionMode.Compress, compressionLevel))
