@@ -96,7 +96,7 @@
                 if (FileEntry.Compression == (int)G3Pak_Compression.Zip && !Options.NoDecompress)
                 {
                     byte[] decompressedData = await ZLibUtil.Decompress(RawData, FileEntry.FileName.GetString());
-                    if (decompressedData.Length > 0) { RawData = decompressedData; }
+                    if (decompressedData.Length > 0) RawData = decompressedData;
                 }
 
                 await _fs.WriteAsync(RawData);
@@ -120,7 +120,7 @@
                 string FileName = Entry.DirectoryEntry.FileName.GetString();
 
                 // Skip "_deleted" directories if NoDeleted is enabled.
-                if (Options.NoDeleted && FileName.StartsWith("_deleted")) { continue; }
+                if (Options.NoDeleted && FileName.StartsWith("_deleted")) continue;
 
                 Directory.CreateDirectory(Path.Combine(Dest, FileName));
                 await Entry.ExtractDirectory(Read, Dest, true); // Extract child folders recursively
@@ -131,7 +131,8 @@
             {
                 // Skip "_deleted" files if NoDeleted is enabled.
                 if (Options.NoDeleted && ((Header.Attributes & (uint)G3Pak_FileAttribute.Deleted) > 0 || 
-                    Entry.FileEntry.FileName.GetString().StartsWith("_deleted"))) { continue; }
+                    Entry.FileEntry.FileName.GetString().StartsWith("_deleted"))) 
+                continue;
                 
                 tasks.Add(Entry.ExtractFile(Read, Dest));
             }

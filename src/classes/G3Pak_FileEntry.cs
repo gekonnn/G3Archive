@@ -42,7 +42,7 @@
             }
             else
             {
-                return new byte[] { };
+                return Array.Empty<byte>();
             }
         }
 

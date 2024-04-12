@@ -33,13 +33,9 @@
         {
             string RelPath = Path.GetRelativePath(RootDirectory.FullName, file.FullName);
             if (RelPath != ".")
-            {
                 FileName = new G3Pak_FileString(bw, RelPath + "/");
-            }
             else
-            {
                 FileName = new G3Pak_FileString(bw, "");
-            }
 
             if ((file.Attributes & FileAttributes.Directory) > 0)
             {

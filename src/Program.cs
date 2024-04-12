@@ -7,7 +7,11 @@ namespace G3Archive
     {
         static async Task Extract(FileInfo file)
         {
-            if (!File.Exists(file.FullName)) { Logger.Log("Specified file does not exist"); return; }
+            if (!File.Exists(file.FullName)) 
+            {
+                Logger.Log("Specified file does not exist"); 
+                return; 
+            }
 
             try
             {
@@ -22,7 +26,11 @@ namespace G3Archive
                 bool success = await PakFile.Extract(Options.Destination);
 
                 sw.Stop();
-                if (success) { Logger.Log(string.Format("{0} extracted successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
+                
+                if (success)
+                {
+                    Logger.Log(string.Format("{0} extracted successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed));
+                }
             }
             catch (Exception ex)
             {
@@ -33,7 +41,11 @@ namespace G3Archive
 
         static void Pack(FileInfo directory)
         {
-            if (!Directory.Exists(directory.FullName)) { Logger.Log("Specified directory does not exist"); return; }
+            if (!Directory.Exists(directory.FullName)) 
+            { 
+                Logger.Log("Specified directory does not exist"); 
+                return; 
+            }
             
             try
             {
@@ -44,7 +56,11 @@ namespace G3Archive
                 bool success = PakFile.WriteArchive(directory, Options.Destination);
 
                 sw.Stop();
-                if (success) { Logger.Log(string.Format("{0} packed successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed)); }
+                
+                if (success)
+                {
+                    Logger.Log(string.Format("{0} packed successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed));
+                }
             }
             catch (Exception ex)
             {
@@ -79,7 +95,6 @@ namespace G3Archive
                 {
                     string Destination = Path.Combine(o.Destination ?? Directory.GetCurrentDirectory(), "");
 
-                    // Store options in a separate static class
                     Options.Path = o.Path;
                     Options.Extract = o.Extract;
                     Options.Pack = o.Pack;
@@ -94,12 +109,21 @@ namespace G3Archive
 
                     if (o.Extract)
                     {
-                        if (Destination == Directory.GetCurrentDirectory()) { Options.Destination = Path.Combine(Destination, Path.GetFileNameWithoutExtension(o.Path.FullName)); }
+                        if (Destination == Directory.GetCurrentDirectory()) 
+                        {
+                            Options.Destination = Path.Combine(Destination, Path.GetFileNameWithoutExtension(o.Path.FullName));
+                        };
+
                         Extract(o.Path).Wait();
                     }
+                    
                     if (o.Pack)
                     {
-                        if (Destination == Directory.GetCurrentDirectory()) { Options.Destination = Path.Combine(Destination, o.Path.Name + ".pak"); }
+                        if (Destination == Directory.GetCurrentDirectory())
+                        {
+                            Options.Destination = Path.Combine(Destination, o.Path.Name + ".pak");
+                        }
+
                         Pack(o.Path);
                     }
                 }
