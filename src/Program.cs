@@ -90,7 +90,7 @@ namespace G3Archive
                     ParsedOptions.Overwrite = o.Overwrite;
                     ParsedOptions.Quiet = o.Quiet;
 
-                    Logger.Quiet = o.Quiet;
+                    Logger.Enabled = !o.Quiet;
 
                     if (o.Extract)
                     {
