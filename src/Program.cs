@@ -76,8 +76,7 @@ namespace G3Archive
                     args = new[] { args[0], "-p" };
                 }
             }
-
-            if (args.Length == 0)
+            else if (args.Length == 0)
             {
                 args = new[] { "--help" };
             }
@@ -85,45 +84,41 @@ namespace G3Archive
             Parser.Default.ParseArguments<UnparsedOptions>(args)
             .WithParsed<UnparsedOptions>(o =>
             {
-                if(o.Path != null)
+                if (o.Path != null)
                 {
-                    string Destination = Path.Combine(o.Destination ?? Directory.GetCurrentDirectory(), "");
-
                     Options.Path = o.Path;
                     Options.Extract = o.Extract;
                     Options.Pack = o.Pack;
-                    Options.Destination = Destination;
+                    Options.Destination = Path.GetFullPath((Path.Combine(o.Destination ?? Directory.GetCurrentDirectory(), "")));
                     Options.Compression = o.Compression;
                     Options.NoDecompress = o.NoDecompress;
                     Options.NoDeleted = o.NoDeleted;
                     Options.Overwrite = o.Overwrite;
                     Options.Quiet = o.Quiet;
 
-                    Logger.Enabled = !o.Quiet;
+                    Logger.Enabled = !Options.Quiet;
 
                     if (o.Extract)
                     {
-                        if (Destination == Directory.GetCurrentDirectory()) 
+                        if (Options.Destination == Directory.GetCurrentDirectory())
                         {
-                            Options.Destination = Path.Combine(Destination, Path.GetFileNameWithoutExtension(o.Path.FullName));
+                            Options.Destination = Path.Combine(Options.Destination, Path.GetFileNameWithoutExtension(o.Path.FullName));
                         };
 
                         Extract(o.Path).Wait();
                     }
-                    
+
                     if (o.Pack)
                     {
-                        if (Destination == Directory.GetCurrentDirectory())
+                        if (Options.Destination == Directory.GetCurrentDirectory())
                         {
-                            Options.Destination = Path.Combine(Destination, o.Path.Name + ".pak");
+                            Options.Destination = Path.Combine(Options.Destination, o.Path.Name + ".pak");
                         }
 
                         Pack(o.Path);
                     }
                 }
             });
-            
-            
         }
     }
 }
