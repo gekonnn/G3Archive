@@ -6,8 +6,9 @@ namespace G3Archive
     public class G3Pak_Archive
     {
         public FileInfo? File;
-        private BinaryReader br             = default!;
         private FileStream fs               = default!;
+        private BinaryReader br             = default!;
+        private BinaryWriter bw             = default!;
         private G3Pak_Archive_Header Header = default!;
 
         public void ReadArchive(FileInfo file)
@@ -47,26 +48,26 @@ namespace G3Archive
             try
             {
                 this.fs = new(File.FullName, FileMode.OpenOrCreate);
-                using BinaryWriter _bw = new(fs, Encoding.GetEncoding("iso-8859-1"));
+                this.bw = new(fs, Encoding.GetEncoding("iso-8859-1"));
 
                 Logger.Log("Writing header...");
 
                 Header = new G3Pak_Archive_Header();
-                Header.Write(_bw);
+                Header.Write(bw);
 
-                G3Pak_FileTableEntry RootEntry = new(_bw, Folder, Folder);
+                G3Pak_FileTableEntry RootEntry = new(bw, Folder, Folder);
 
                 ulong OffsetToFiles = (ulong)fs.Position;
                 ulong OffsetToFolders = OffsetToFiles;
 
                 // Write file entries
                 Logger.Log("Writing entries...");
-                RootEntry.WriteEntry(_bw);
+                RootEntry.WriteEntry(bw);
 
                 ulong FileSize = (ulong)fs.Position;
                 ulong OffsetToVolume = FileSize - 4;
 
-                Header.WriteOffsets(_bw, OffsetToFiles, OffsetToFolders, OffsetToVolume);
+                Header.WriteOffsets(bw, OffsetToFiles, OffsetToFolders, OffsetToVolume);
                 fs.SetLength((long)FileSize);
 
                 return true;
