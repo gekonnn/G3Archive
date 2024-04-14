@@ -5,11 +5,11 @@ namespace G3Archive
 {
     public class G3Pak_Archive
     {
-        public FileInfo? File;
-        private FileStream fs               = default!;
-        private BinaryReader Reader         = default!;
-        private BinaryWriter Writer         = default!;
-        private G3Pak_Archive_Header Header = default!;
+        public  readonly FileInfo? File;
+        private readonly FileStream fs          = default!;
+        private readonly BinaryReader Reader    = default!;
+        private readonly BinaryWriter Writer    = default!;
+        private G3Pak_Archive_Header Header     = default!;
 
         public G3Pak_Archive() { }
 
