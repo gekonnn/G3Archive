@@ -48,7 +48,9 @@
             bw.Write(Compression);
             bw.Write(Reserved);
 
-            Pos_OffsetToFiles   = bw.BaseStream.Position;
+            // Probably not neccessary as the positions are
+            // always static, just to be safe though.
+            Pos_OffsetToFiles = bw.BaseStream.Position;
             bw.Write(OffsetToFiles);
             Pos_OffsetToFolders = bw.BaseStream.Position;
             bw.Write(OffsetToFolders);
@@ -60,6 +62,7 @@
         {
             long OriginalOffset = bw.BaseStream.Position;
 
+            // Seeking might not be actually neccessary in this case
             bw.BaseStream.Seek(Pos_OffsetToFiles, SeekOrigin.Begin);
             bw.Write(OffsetToFiles);
             this.OffsetToFiles      = OffsetToFiles;
@@ -72,6 +75,7 @@
             bw.Write(OffsetToVolume);
             this.OffsetToVolume     = OffsetToVolume;
 
+            // Return to the original offset before method call
             bw.BaseStream.Seek(OriginalOffset, SeekOrigin.Begin);
         }
     }

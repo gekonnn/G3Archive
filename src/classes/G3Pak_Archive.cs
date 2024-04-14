@@ -65,20 +65,23 @@ namespace G3Archive
                     Header = new G3Pak_Archive_Header();
                     Header.Write(Writer);
 
+                    // Create a root entry and write file data recursively
                     G3Pak_FileTableEntry RootEntry = new(Writer, Folder, Folder);
 
                     ulong OffsetToFiles = (ulong)fs.Position;
                     ulong OffsetToFolders = OffsetToFiles;
 
-                    // Write file entries
+                    // Write file entries recursively from the root entry
                     Logger.Log("Writing entries...");
                     RootEntry.WriteEntry(Writer);
 
                     ulong ArchiveSize = (ulong)fs.Position;
                     ulong OffsetToVolume = ArchiveSize - 4;
 
+                    // Finally write all offsets to the header
                     Header.WriteOffsets(Writer, OffsetToFiles, OffsetToFolders, OffsetToVolume);
-                    fs.SetLength((long)ArchiveSize);
+
+                    fs.SetLength((long)ArchiveSize);  // Crop the file to the current position (effective only when overwriting)
 
                     return true;
                 }
@@ -120,6 +123,7 @@ namespace G3Archive
 
         public void Close()
         {
+            // Ensure we even have anything to close
             if (fs != null)
             {
                 fs.Flush();
