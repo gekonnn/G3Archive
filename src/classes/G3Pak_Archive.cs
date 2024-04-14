@@ -7,8 +7,8 @@ namespace G3Archive
     {
         public FileInfo? File;
         private FileStream fs               = default!;
-        private BinaryReader br             = default!;
-        private BinaryWriter bw             = default!;
+        private BinaryReader Reader         = default!;
+        private BinaryWriter Writer         = default!;
         private G3Pak_Archive_Header Header = default!;
 
         public void ReadArchive(FileInfo file)
@@ -17,7 +17,7 @@ namespace G3Archive
             {
                 File = file;
                 fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read);
-                br = new BinaryReader(fs, Encoding.GetEncoding("iso-8859-1"));
+                Reader = new BinaryReader(fs, Encoding.GetEncoding("iso-8859-1"));
                 Header = new G3Pak_Archive_Header();
             }
             catch (Exception ex)
@@ -48,26 +48,26 @@ namespace G3Archive
             try
             {
                 this.fs = new(File.FullName, FileMode.OpenOrCreate);
-                this.bw = new(fs, Encoding.GetEncoding("iso-8859-1"));
+                this.Writer = new(fs, Encoding.GetEncoding("iso-8859-1"));
 
                 Logger.Log("Writing header...");
 
                 Header = new G3Pak_Archive_Header();
-                Header.Write(bw);
+                Header.Write(Writer);
 
-                G3Pak_FileTableEntry RootEntry = new(bw, Folder, Folder);
+                G3Pak_FileTableEntry RootEntry = new(Writer, Folder, Folder);
 
                 ulong OffsetToFiles = (ulong)fs.Position;
                 ulong OffsetToFolders = OffsetToFiles;
 
                 // Write file entries
                 Logger.Log("Writing entries...");
-                RootEntry.WriteEntry(bw);
+                RootEntry.WriteEntry(Writer);
 
                 ulong FileSize = (ulong)fs.Position;
                 ulong OffsetToVolume = FileSize - 4;
 
-                Header.WriteOffsets(bw, OffsetToFiles, OffsetToFolders, OffsetToVolume);
+                Header.WriteOffsets(Writer, OffsetToFiles, OffsetToFolders, OffsetToVolume);
                 fs.SetLength((long)FileSize);
 
                 return true;
@@ -85,10 +85,10 @@ namespace G3Archive
             {
                 if (File != null)
                 {
-                    Header.Read(br);
+                    Header.Read(Reader);
                     fs.Seek((long)Header.OffsetToFiles, SeekOrigin.Begin);
-                    G3Pak_FileTableEntry RootEntry = new(br);
-                    bool success = await RootEntry.ExtractDirectory(br, Dest, Options.Overwrite);
+                    G3Pak_FileTableEntry RootEntry = new(Reader);
+                    bool success = await RootEntry.ExtractDirectory(Reader, Dest, Options.Overwrite);
                     return success;
                 }
                 else
