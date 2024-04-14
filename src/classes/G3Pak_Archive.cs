@@ -46,8 +46,8 @@ namespace G3Archive
 
             try
             {
-                using FileStream _fs = new(File.FullName, FileMode.OpenOrCreate);
-                using BinaryWriter _bw = new(_fs, Encoding.GetEncoding("iso-8859-1"));
+                this.fs = new(File.FullName, FileMode.OpenOrCreate);
+                using BinaryWriter _bw = new(fs, Encoding.GetEncoding("iso-8859-1"));
 
                 Logger.Log("Writing header...");
 
@@ -56,18 +56,18 @@ namespace G3Archive
 
                 G3Pak_FileTableEntry RootEntry = new(_bw, Folder, Folder);
 
-                ulong OffsetToFiles = (ulong)_fs.Position;
+                ulong OffsetToFiles = (ulong)fs.Position;
                 ulong OffsetToFolders = OffsetToFiles;
 
                 // Write file entries
                 Logger.Log("Writing entries...");
                 RootEntry.WriteEntry(_bw);
 
-                ulong FileSize = (ulong)_fs.Position;
+                ulong FileSize = (ulong)fs.Position;
                 ulong OffsetToVolume = FileSize - 4;
 
                 Header.WriteOffsets(_bw, OffsetToFiles, OffsetToFolders, OffsetToVolume);
-                _fs.SetLength((long)FileSize);
+                fs.SetLength((long)FileSize);
 
                 return true;
             }
