@@ -17,7 +17,7 @@ namespace G3Archive
                 File = file;
                 fs = new FileStream(file.FullName, FileMode.Open, FileAccess.Read);
                 br = new BinaryReader(fs, Encoding.GetEncoding("iso-8859-1"));
-                Header = new G3Pak_Archive_Header(br);
+                Header = new G3Pak_Archive_Header();
             }
             catch (Exception ex)
             {
@@ -84,6 +84,7 @@ namespace G3Archive
             {
                 if (File != null)
                 {
+                    Header.Read(br);
                     fs.Seek((long)Header.OffsetToFiles, SeekOrigin.Begin);
                     G3Pak_FileTableEntry RootEntry = new(br);
                     bool success = await RootEntry.ExtractDirectory(br, Dest, Options.Overwrite);
