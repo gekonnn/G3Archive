@@ -7,10 +7,10 @@ namespace G3Archive
     {
         static async Task Extract(FileInfo file)
         {
-            if (!File.Exists(file.FullName)) 
+            if (!File.Exists(file.FullName))
             {
-                Logger.Log("Specified file does not exist"); 
-                return; 
+                Logger.Log("Specified file does not exist");
+                return;
             }
 
             try
@@ -19,18 +19,13 @@ namespace G3Archive
                 sw.Start();
 
                 Logger.Log("Reading archive header...");
-                G3Pak_Archive PakFile = new();
-                PakFile.ReadArchive(file);
-
+                G3Pak_Archive PakFile = new(file);
                 Logger.Log("Extracting archive...");
                 bool success = await PakFile.Extract(Options.Destination);
 
                 sw.Stop();
-                
                 if (success)
-                {
                     Logger.Log(string.Format("{0} extracted successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed));
-                }
             }
             catch (Exception ex)
             {
@@ -41,26 +36,23 @@ namespace G3Archive
 
         static void Pack(FileInfo directory)
         {
-            if (!Directory.Exists(directory.FullName)) 
-            { 
-                Logger.Log("Specified directory does not exist"); 
-                return; 
+            if (!Directory.Exists(directory.FullName))
+            {
+                Logger.Log("Specified directory does not exist");
+                return;
             }
-            
+
             try
             {
                 Stopwatch sw = new();
                 sw.Start();
 
-                G3Pak_Archive PakFile = new();
-                bool success = PakFile.WriteArchive(directory, Options.Destination);
+                G3Pak_Archive PakFile = new(directory, Options.Destination);
+                bool success = PakFile.WriteArchive(directory);
 
                 sw.Stop();
-                
                 if (success)
-                {
                     Logger.Log(string.Format("{0} packed successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed));
-                }
             }
             catch (Exception ex)
             {
