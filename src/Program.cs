@@ -22,6 +22,7 @@ namespace G3Archive
                 G3Pak_Archive PakFile = new(file);
                 Logger.Log("Extracting archive...");
                 bool success = await PakFile.Extract(Options.Destination);
+                PakFile.Close();
 
                 sw.Stop();
                 if (success)
@@ -49,6 +50,7 @@ namespace G3Archive
 
                 G3Pak_Archive PakFile = new(directory, Options.Destination);
                 bool success = PakFile.WriteArchive(directory);
+                PakFile.Close();
 
                 sw.Stop();
                 if (success)

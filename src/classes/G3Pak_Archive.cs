@@ -117,5 +117,14 @@ namespace G3Archive
                 throw new("Archive reader not assigned");
             }
         }
+
+        public void Close()
+        {
+            if (fs != null)
+            {
+                fs.Flush();
+                fs.Close();
+            }
+        }
     }
 }
