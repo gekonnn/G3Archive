@@ -96,9 +96,9 @@ namespace G3Archive
                     Options.NoDecompress = o.NoDecompress;
                     Options.NoDeleted = o.NoDeleted;
                     Options.Overwrite = o.Overwrite;
-                    Options.Quiet = o.Quiet;
+                    Options.Verbose = !o.Quiet;
 
-                    Logger.Enabled = !Options.Quiet;
+                    Logger.Enabled = Options.Verbose;
 
                     if (o.Extract)
                     {
