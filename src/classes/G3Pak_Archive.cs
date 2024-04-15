@@ -133,6 +133,7 @@ namespace G3Archive
                 this.fs.Flush();
                 this.fs.Dispose();
             }
+            GC.SuppressFinalize(this);
         }
     }
 }
