@@ -13,10 +13,11 @@ namespace G3Archive
 
         public G3Pak_Archive() { }
 
-        public G3Pak_Archive(FileInfo File, string? Dest = null)
+        public G3Pak_Archive(string FilePath, string? Dest = null)
         {
-            if (File != null)
+            if (FilePath != null && Path.Exists(FilePath))
             {
+                this.File = new FileInfo(FilePath);
                 this.Header = new G3Pak_Archive_Header();
 
                 // Determine whenever the file is a directory or a file
@@ -31,7 +32,7 @@ namespace G3Archive
                             throw new(string.Format("File named {0} already exists.\nConsider renaming the file or using the \"--overwrite\" option.", File.Name));
                         }
 
-                        if (File.FullName == Directory.GetParent(Dest)!.FullName)
+                        if (FilePath == Directory.GetParent(Dest)!.FullName)
                         {
                             throw new(string.Format("Destination path cannot be the same as packed folder's path"));
                         }
@@ -46,19 +47,20 @@ namespace G3Archive
                 }
                 else
                 {
-                    this.fs = new FileStream(File.FullName, FileMode.Open, FileAccess.ReadWrite);
+                    this.fs = new FileStream(FilePath, FileMode.Open, FileAccess.ReadWrite);
                 }
 
-                this.File = new FileInfo(fs.Name);
                 this.Reader = new BinaryReader(this.fs, Encoding.GetEncoding("iso-8859-1"));
                 this.Writer = new BinaryWriter(this.fs, Encoding.GetEncoding("iso-8859-1"));
             }
         }
 
-        public bool WriteArchive(FileInfo Folder)
+        public bool WriteArchive(string FolderPath)
         {
             if (this.Writer != null)
             {
+                FileInfo Folder = new(FolderPath);
+
                 Logger.Log("Writing header...");
 
                 try
