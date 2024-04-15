@@ -17,16 +17,16 @@ namespace G3Archive
             {
                 Stopwatch sw = new();
                 sw.Start();
-
-                Logger.Log("Reading archive header...");
-                G3Pak_Archive PakFile = new(file);
-                Logger.Log("Extracting archive...");
-                bool success = await PakFile.Extract(Options.Destination);
-                PakFile.Close();
+                
+                using (G3Pak_Archive Archive = new(file))
+                {
+                    bool success = await Archive.Extract(Options.Destination);
+                    
+                    if (success)
+                        Logger.Log(string.Format("{0} extracted successfully. (Time: {1})", file.Name, sw.Elapsed));
+                }
 
                 sw.Stop();
-                if (success)
-                    Logger.Log(string.Format("{0} extracted successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed));
             }
             catch (Exception ex)
             {
@@ -48,13 +48,15 @@ namespace G3Archive
                 Stopwatch sw = new();
                 sw.Start();
 
-                G3Pak_Archive PakFile = new(directory, Options.Destination);
-                bool success = PakFile.WriteArchive(directory);
-                PakFile.Close();
+                using (G3Pak_Archive Archive = new(directory, Options.Destination))
+                {
+                    bool success = Archive.WriteArchive(directory);
+                    
+                    if (success)
+                        Logger.Log(string.Format("{0} packed successfully. (Time: {1})", directory.Name, sw.Elapsed));
+                }
 
                 sw.Stop();
-                if (success)
-                    Logger.Log(string.Format("{0} packed successfully. (Time: {1})", PakFile.File!.Name, sw.Elapsed));
             }
             catch (Exception ex)
             {

@@ -3,7 +3,7 @@ using System.Text;
 
 namespace G3Archive
 {
-    public class G3Pak_Archive
+    public class G3Pak_Archive : IDisposable
     {
         public  readonly FileInfo? File;
         private readonly FileStream fs          = default!;
@@ -59,9 +59,10 @@ namespace G3Archive
         {
             if (this.Writer != null)
             {
+                Logger.Log("Writing header...");
+
                 try
                 {
-                    Logger.Log("Writing header...");
                     Header = new G3Pak_Archive_Header();
                     Header.Write(Writer);
 
@@ -100,6 +101,8 @@ namespace G3Archive
         {
             if (this.Reader != null)
             {
+                Logger.Log("Extracting archive...");
+
                 try
                 {
                     Header.Read(Reader);
@@ -121,13 +124,12 @@ namespace G3Archive
             }
         }
 
-        public void Close()
+        public void Dispose()
         {
-            // Ensure we even have anything to close
-            if (fs != null)
+            if (fs != null) // Ensure we even have anything to close
             {
-                fs.Flush();
-                fs.Close();
+                this.fs.Flush();
+                this.fs.Dispose();
             }
         }
     }
