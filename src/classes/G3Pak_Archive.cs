@@ -5,7 +5,7 @@ namespace G3Archive
 {
     public class G3Pak_Archive : IDisposable
     {
-        public  readonly FileInfo? File;
+        public  readonly FileInfo File          = default!;
         private readonly FileStream fs          = default!;
         private readonly BinaryReader Reader    = default!;
         private readonly BinaryWriter Writer    = default!;
