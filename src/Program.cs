@@ -5,7 +5,7 @@ namespace G3Archive
 {
     class Program
     {
-        static async Task Extract(string file)
+        static async Task Extract(string file, ArchiveOptions options)
         {
             if (!File.Exists(file))
             {
@@ -18,9 +18,9 @@ namespace G3Archive
                 Stopwatch sw = new();
                 sw.Start();
                 
-                using (G3Pak_Archive Archive = new(file))
+                using (G3Pak_Archive Archive = new(file, Options: options))
                 {
-                    bool success = await Archive.Extract(Options.Destination);
+                    bool success = await Archive.Extract();
                     
                     if (success)
                         Logger.Log(string.Format("{0} extracted successfully. (Time: {1})", Path.GetFileName(file), sw.Elapsed));
@@ -35,7 +35,7 @@ namespace G3Archive
             }
         }
 
-        static void Pack(string DirectoryPath)
+        static void Pack(string DirectoryPath, ArchiveOptions options)
         {
             if (!Directory.Exists(DirectoryPath))
             {
@@ -48,7 +48,7 @@ namespace G3Archive
                 Stopwatch sw = new();
                 sw.Start();
 
-                using (G3Pak_Archive Archive = new(DirectoryPath, Options.Destination))
+                using (G3Pak_Archive Archive = new(DirectoryPath, Options: options))
                 {
                     bool success = Archive.WriteArchive(DirectoryPath);
                     
@@ -84,40 +84,39 @@ namespace G3Archive
             }
 
             Parser.Default.ParseArguments<UnparsedOptions>(args)
-            .WithParsed<UnparsedOptions>(o =>
+            .WithParsed(o =>
             {
                 if (o.Path != null)
                 {
-                    Options.Path = o.Path;
-                    Options.Extract = o.Extract;
-                    Options.Pack = o.Pack;
-                    Options.Destination = Path.GetFullPath((Path.Combine(o.Destination ?? Directory.GetCurrentDirectory(), "")));
-                    Options.Compression = o.Compression;
-                    Options.NoDecompress = o.NoDecompress;
-                    Options.NoDeleted = o.NoDeleted;
-                    Options.Overwrite = o.Overwrite;
-                    Options.Verbose = !o.Quiet;
+                    ArchiveOptions archiveOptions = new()
+                    {
+                        Destination     = Path.GetFullPath((Path.Combine(o.Destination ?? Directory.GetCurrentDirectory(), ""))),
+                        Compression     = o.Compression,
+                        NoDecompress    = o.NoDecompress,
+                        NoDeleted       = o.NoDeleted,
+                        Overwrite       = o.Overwrite,
+                    };
 
-                    Logger.Enabled = Options.Verbose;
+                    Logger.Enabled = !o.Quiet;
 
                     if (o.Extract)
                     {
-                        if (Options.Destination == Directory.GetCurrentDirectory())
+                        if (archiveOptions.Destination == Directory.GetCurrentDirectory())
                         {
-                            Options.Destination = Path.Combine(Options.Destination, Path.GetFileNameWithoutExtension(o.Path));
+                            archiveOptions.Destination = Path.Combine(archiveOptions.Destination, Path.GetFileNameWithoutExtension(o.Path));
                         };
 
-                        Extract(o.Path).Wait();
+                        Extract(o.Path, archiveOptions).Wait();
                     }
 
                     if (o.Pack)
                     {
-                        if (Options.Destination == Directory.GetCurrentDirectory())
+                        if (archiveOptions.Destination == Directory.GetCurrentDirectory())
                         {
-                            Options.Destination = Path.Combine(Options.Destination, o.Path + ".pak");
+                            archiveOptions.Destination = Path.Combine(archiveOptions.Destination, o.Path + ".pak");
                         }
 
-                        Pack(o.Path);
+                        Pack(o.Path, archiveOptions);
                     }
                 }
             });

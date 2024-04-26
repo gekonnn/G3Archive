@@ -2,47 +2,59 @@
 {
     public class G3Pak_DirectoryEntry
     {
-        public G3Pak_FileString FileName;
-        public G3Pak_FileTableEntry[] DirTable;
-        public UInt32 DirCount;
-        public G3Pak_FileTableEntry[] FileTable;
-        public UInt32 FileCount;
+        public readonly G3Pak_Archive Archive;
 
-        public G3Pak_DirectoryEntry(BinaryReader br)
+        public G3Pak_FileString FileName        = default!;
+        public G3Pak_FileTableEntry[] DirTable  = default!;
+        public UInt32 DirCount                  = default!;
+        public G3Pak_FileTableEntry[] FileTable = default!;
+        public UInt32 FileCount                 = default!;
+
+        public G3Pak_DirectoryEntry(G3Pak_Archive Archive)
         {
-            FileName = new G3Pak_FileString(br);
+            this.Archive = Archive;
+        }
 
-            DirCount = br.ReadUInt32();
+        public void ReadFromArchive()
+        {
+            FileName = new G3Pak_FileString(Archive);
+            FileName.ReadFromArchive();
+
+            DirCount = Archive.Reader.ReadUInt32();
             DirTable = new G3Pak_FileTableEntry[DirCount];
             for (int i_dir = 0; i_dir < DirCount; i_dir++)
             {
-                G3Pak_FileTableEntry _fileTableEntry = new(br);
+                G3Pak_FileTableEntry _fileTableEntry = new(Archive);
+                _fileTableEntry.ReadFromArchive();
+
                 DirTable[i_dir] = _fileTableEntry;
             }
 
-            FileCount = br.ReadUInt32();
+            FileCount = Archive.Reader.ReadUInt32();
             FileTable = new G3Pak_FileTableEntry[FileCount];
             for (int i_file = 0; i_file < FileCount; i_file++)
             {
-                G3Pak_FileTableEntry _fileTableEntry = new(br);
+                G3Pak_FileTableEntry _fileTableEntry = new(Archive);
+                _fileTableEntry.ReadFromArchive();
+
                 FileTable[i_file] = _fileTableEntry;
             }
         }
 
-        public G3Pak_DirectoryEntry(BinaryWriter bw, FileInfo file, FileInfo RootDirectory)
+        public void Write(FileInfo file, FileInfo RootDirectory)
         {
             string RelPath = Path.GetRelativePath(RootDirectory.FullName, file.FullName);
             if (RelPath != ".")
-                FileName = new G3Pak_FileString(bw, RelPath + "/");
+                FileName = new G3Pak_FileString(Archive, RelPath + "/");
             else
-                FileName = new G3Pak_FileString(bw, "");
+                FileName = new G3Pak_FileString(Archive, "");
 
             if ((file.Attributes & FileAttributes.Directory) > 0)
             {
                 string[] FileEntries;
                 string[] DirectoryEntries;
 
-                if (Options.NoDeleted)
+                if (Archive.Options.NoDeleted)
                 {
                     FileEntries = Directory.GetFiles(file.FullName).Where(x => !x.Contains("_deleted")).ToArray();
                     DirectoryEntries = Directory.GetDirectories(file.FullName).Where(x => !x.Contains("_deleted")).ToArray();
@@ -62,7 +74,9 @@
                 for(int i = 0; i < DirCount; i++)
                 {
                     FileInfo Dir = new(DirectoryEntries[i]);
-                    G3Pak_FileTableEntry _fileTableEntry = new(bw, Dir, RootDirectory);
+
+                    G3Pak_FileTableEntry _fileTableEntry = new(Archive);
+                    _fileTableEntry.Write(Dir, RootDirectory);
                     DirTable[i] = _fileTableEntry;
                 }
 
@@ -70,10 +84,11 @@
                 {
                     FileInfo _File = new(FileEntries[i]);
                     Logger.Log(string.Format("Writing data for {0}", _File.Name));
-                    uint OffsetToData = (uint)bw.BaseStream.Position;
+                    uint OffsetToData = (uint)Archive.fs.Position;
                     
-                    G3Pak_FileTableEntry _fileTableEntry = new(bw, _File, RootDirectory, OffsetToData);
-                    _fileTableEntry.WriteData(bw, OffsetToData);
+                    G3Pak_FileTableEntry _fileTableEntry = new(Archive);
+                    _fileTableEntry.Write(_File, RootDirectory, OffsetToData);
+                    _fileTableEntry.WriteData(OffsetToData);
                     FileTable[i] = _fileTableEntry;
                 }
             }

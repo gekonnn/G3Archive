@@ -2,39 +2,48 @@
 {
     public class G3Pak_FileEntry
     {
+        public readonly G3Pak_Archive Archive;
+
         public UInt64 Offset;
         public UInt64 Bytes;
         public UInt64 Size;
         public UInt32 Encryption;
         public UInt32 Compression;
-        public G3Pak_FileString FileName;
-        public G3Pak_FileString Comment;
+        public G3Pak_FileString FileName = default!;
+        public G3Pak_FileString Comment = default!;
         public FileInfo? EntryFile;
 
-        public G3Pak_FileEntry(BinaryReader br)
+        public G3Pak_FileEntry(G3Pak_Archive Archive)
         {
-            Offset      = br.ReadUInt64();
-            Bytes       = br.ReadUInt64();
-            Size        = br.ReadUInt64();
-            Encryption  = br.ReadUInt32();
-            Compression = br.ReadUInt32();
-            FileName    = new G3Pak_FileString(br);
-            Comment     = new G3Pak_FileString(br);
+            this.Archive = Archive;
         }
 
-        public G3Pak_FileEntry(BinaryWriter bw, FileInfo file, FileInfo RootDirectory, UInt64 OffsetToFiles, uint Compression = 0, string Comment = "")
+        public void ReadFromArchive()
+        {
+            Offset      = Archive.Reader.ReadUInt64();
+            Bytes       = Archive.Reader.ReadUInt64();
+            Size        = Archive.Reader.ReadUInt64();
+            Encryption  = Archive.Reader.ReadUInt32();
+            Compression = Archive.Reader.ReadUInt32();
+            FileName    = new G3Pak_FileString(Archive);
+            FileName.ReadFromArchive();
+            Comment     = new G3Pak_FileString(Archive);
+            Comment.ReadFromArchive(); 
+        }
+
+        public void ReadFromFile(FileInfo file, FileInfo RootDirectory, UInt64 OffsetToFiles, uint Compression = 0, string Comment = "")
         {
             this.Offset         = OffsetToFiles;
             this.Bytes          = (uint)file.Length;
             this.Size           = (uint)File.ReadAllBytes(file.FullName).Length;
             this.Encryption     = 0;
             this.Compression    = Compression;
-            this.FileName       = new G3Pak_FileString(bw, Path.GetRelativePath(RootDirectory.FullName, file.FullName));
-            this.Comment        = new G3Pak_FileString(bw, Comment);
+            this.FileName       = new G3Pak_FileString(Archive, Path.GetRelativePath(RootDirectory.FullName, file.FullName));
+            this.Comment        = new G3Pak_FileString(Archive, Comment);
             this.EntryFile      = file;
         }
 
-        public byte[] ReadBytes()
+        public byte[] ReadFileBytes()
         {
             if (EntryFile != null)
             {
@@ -46,15 +55,15 @@
             }
         }
 
-        public void WriteEntry(BinaryWriter bw)
+        public void Write()
         {
-            bw.Write(Offset);
-            bw.Write(Bytes);
-            bw.Write(Size);
-            bw.Write(Encryption);
-            bw.Write(Compression);
-            FileName.Write(bw);
-            Comment.Write(bw);
+            Archive.Writer.Write(Offset);
+            Archive.Writer.Write(Bytes);
+            Archive.Writer.Write(Size);
+            Archive.Writer.Write(Encryption);
+            Archive.Writer.Write(Compression);
+            FileName.Write();
+            Comment.Write();
         }
     }
 }

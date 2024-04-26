@@ -1,68 +1,84 @@
 ﻿namespace G3Archive
 {
     public class G3Pak_FileTableEntry
-    {   
-        public G3Pak_FileTableEntry_Header Header;
+    {
+        public readonly G3Pak_Archive Archive = default!;
+
+        public G3Pak_FileTableEntry_Header Header = default!;
         public G3Pak_DirectoryEntry DirectoryEntry = default!;
         public G3Pak_FileEntry FileEntry = default!;
 
-        public G3Pak_FileTableEntry(BinaryReader br)
+        public G3Pak_FileTableEntry(G3Pak_Archive Archive)
         {
-            Header = new G3Pak_FileTableEntry_Header(br);
+            this.Archive = Archive;
+        }
+
+        public void ReadFromArchive()
+        {   
+            Header = new G3Pak_FileTableEntry_Header(Archive);
+            Header.ReadFromArchive();
+
             if ((Header.Attributes & (uint)G3Pak_FileAttribute.Directory) > 0)
             {
-                DirectoryEntry = new G3Pak_DirectoryEntry(br);
+                DirectoryEntry = new G3Pak_DirectoryEntry(Archive);
+                DirectoryEntry.ReadFromArchive();
             }
             else
             {
-                FileEntry = new G3Pak_FileEntry(br);
+                FileEntry = new G3Pak_FileEntry(Archive);
+                FileEntry.ReadFromArchive();
             }
         }
 
-        public G3Pak_FileTableEntry(BinaryWriter bw, FileInfo File, FileInfo RootDirectory, UInt64 OffsetToFiles = 0)
+        public void Write(FileInfo File, FileInfo RootDirectory, UInt64 OffsetToFiles = 0)
         {
-            Header = new G3Pak_FileTableEntry_Header(bw, File);
+            Header = new G3Pak_FileTableEntry_Header(Archive);
+            Header.ReadFromFile(File);
+
             if ((Header.Attributes & (uint)G3Pak_FileAttribute.Directory) > 0)
             {
-                DirectoryEntry = new G3Pak_DirectoryEntry(bw, File, RootDirectory);
+                DirectoryEntry = new G3Pak_DirectoryEntry(Archive);
+                DirectoryEntry.Write(File, RootDirectory);
             }
             else
             {
-                FileEntry = new G3Pak_FileEntry(bw, File, RootDirectory, OffsetToFiles);
+                FileEntry = new G3Pak_FileEntry(Archive);
+                FileEntry.ReadFromFile(File, RootDirectory, OffsetToFiles);
+                FileEntry.Write();
             }
         }
 
-        public void WriteEntry(BinaryWriter bw)
+        public void WriteEntry()
         {
             // Write header
-            Header.Write(bw);
+            Header.Write();
 
             // Write DirectoryEntry
             if ((Header.Attributes & (uint)G3Pak_FileAttribute.Directory) > 0)
             {
-                DirectoryEntry.FileName.Write(bw);
-                bw.Write(DirectoryEntry.DirCount);
+                DirectoryEntry.FileName.Write();
+                Archive.Writer.Write(DirectoryEntry.DirCount);
                 foreach(G3Pak_FileTableEntry entry in DirectoryEntry.DirTable)
                 {
-                    entry.WriteEntry(bw);
+                    entry.WriteEntry();
                 }
-                bw.Write(DirectoryEntry.FileCount);
+                Archive.Writer.Write(DirectoryEntry.FileCount);
                 foreach (G3Pak_FileTableEntry entry in DirectoryEntry.FileTable)
                 {
-                    entry.WriteEntry(bw);
+                    entry.WriteEntry();
                 }
             }
             else // Write FileEntry
             {
-                FileEntry.WriteEntry(bw);
+                FileEntry.Write();
             }
         }
 
-        public void WriteData(BinaryWriter bw, long Offset)
+        public void WriteData(long Offset)
         {
             if (FileEntry.EntryFile != null)
             {
-                byte[] RawData = FileEntry.ReadBytes();
+                byte[] RawData = FileEntry.ReadFileBytes();
                 if (RawData.Length > (int)G3Pak_Compression.Threshold && !ZLibUtil.CompressionExcludedFileTypes.Contains(FileEntry.EntryFile.Extension))
                 {
                     Header.Attributes += (int)G3Pak_FileAttribute.Compressed;
@@ -76,23 +92,23 @@
                     }
                 }
                 
-                bw.BaseStream.Seek(Offset, SeekOrigin.Begin);
-                bw.Write(RawData);
+                Archive.Writer.BaseStream.Seek(Offset, SeekOrigin.Begin);
+                Archive.Writer.Write(RawData);
             }
         }
 
-        public async Task ExtractFile(BinaryReader br, string Dest)
+        public async Task ExtractFile(string Dest)
         {
             string FileName = FileEntry.FileName.GetString();
 
             Logger.Log(string.Format("Extracting {0} ({1} bytes)", FileName, FileEntry.Size));
 
-            br.BaseStream.Seek(Convert.ToInt64(FileEntry.Offset), SeekOrigin.Begin);
+            Archive.fs.Seek(Convert.ToInt64(FileEntry.Offset), SeekOrigin.Begin);
             int RawData_Bytes = (int)FileEntry.Bytes;
-            byte[] RawData = br.ReadBytes(RawData_Bytes);
+            byte[] RawData = Archive.Reader.ReadBytes(RawData_Bytes);
 
             using FileStream fs = new(Path.Combine(Dest, FileName), FileMode.OpenOrCreate);
-            if (FileEntry.Compression == (int)G3Pak_Compression.Zip && !Options.NoDecompress)
+            if (FileEntry.Compression == (int)G3Pak_Compression.Zip && !Archive.Options.NoDecompress)
             {
                 byte[] decompressedData = await ZLibUtil.Decompress(RawData, FileEntry.FileName.GetString());
                 if (decompressedData.Length > 0) RawData = decompressedData;
@@ -102,7 +118,7 @@
             await fs.FlushAsync();
         }
         
-        public async Task<bool> ExtractDirectory(BinaryReader br, string Dest, bool Overwrite)
+        public async Task<bool> ExtractDirectory(string Dest, bool Overwrite)
         {
             if (Directory.Exists(Dest) && !Overwrite)
             {
@@ -117,21 +133,21 @@
                 string FileName = Entry.DirectoryEntry.FileName.GetString();
 
                 // Skip "_deleted" directories if NoDeleted is enabled.
-                if (Options.NoDeleted && FileName.StartsWith("_deleted")) continue;
+                if (Archive.Options.NoDeleted && FileName.StartsWith("_deleted")) continue;
 
                 Directory.CreateDirectory(Path.Combine(Dest, FileName));
-                await Entry.ExtractDirectory(br, Dest, true); // Extract child folders recursively
+                await Entry.ExtractDirectory(Dest, true); // Extract child folders recursively
             }
             
             List<Task> tasks = new();
             foreach (G3Pak_FileTableEntry Entry in DirectoryEntry.FileTable)
             {
                 // Skip "_deleted" files if NoDeleted is enabled.
-                if (Options.NoDeleted && ((Header.Attributes & (uint)G3Pak_FileAttribute.Deleted) > 0 || 
+                if (Archive.Options.NoDeleted && ((Header.Attributes & (uint)G3Pak_FileAttribute.Deleted) > 0 || 
                     Entry.FileEntry.FileName.GetString().StartsWith("_deleted"))) 
                 continue;
                 
-                tasks.Add(Entry.ExtractFile(br, Dest));
+                tasks.Add(Entry.ExtractFile(Dest));
             }
             await Task.WhenAll(tasks);
 

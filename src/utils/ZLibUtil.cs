@@ -46,13 +46,13 @@ namespace G3Archive
             }
         }
 
-        public static byte[] Compress(byte[] RawData, string FileName = "")
+        public static byte[] Compress(byte[] RawData, string FileName = "", int compressionLevel = 3)
         {
             try
             {
-                CompressionLevel compressionLevel = compressionLevels[Math.Min(Math.Max(Options.Compression, 0), compressionLevels.Length - 1)];
+                CompressionLevel _compressionLevel = compressionLevels[Math.Min(Math.Max(compressionLevel, 0), compressionLevels.Length - 1)];
                 using MemoryStream outputStream = new();
-                using (ZlibStream compressionStream = new(outputStream, CompressionMode.Compress, compressionLevel))
+                using (ZlibStream compressionStream = new(outputStream, CompressionMode.Compress, _compressionLevel))
                 {
                     compressionStream.Write(RawData, 0, RawData.Length);
                 }

@@ -2,6 +2,8 @@
 {
     public class G3Pak_FileTableEntry_Header
     {
+        public readonly G3Pak_Archive Archive;
+
         public UInt64 FileTime1;
         public UInt64 FileTime2;
         public UInt64 FileTime3;
@@ -9,35 +11,46 @@
         public UInt32 FileSizeLow;
         public UInt32 Attributes;
 
-        public G3Pak_FileTableEntry_Header(BinaryReader br)
+        public G3Pak_FileTableEntry_Header(G3Pak_Archive Archive)
         {
-            FileTime1       = br.ReadUInt64();
-            FileTime2       = br.ReadUInt64();
-            FileTime3       = br.ReadUInt64();
-            FileSizeHigh    = br.ReadUInt32();
-            FileSizeLow     = br.ReadUInt32();
-            Attributes      = br.ReadUInt32();
+            this.Archive = Archive;
         }
 
-        public G3Pak_FileTableEntry_Header(BinaryWriter bw, FileInfo File)
+        public void ReadFromArchive()
         {
-            FileTime1 = (ulong)File.CreationTime.ToFileTimeUtc();
-            FileTime2 = (ulong)File.LastAccessTime.ToFileTimeUtc();
-            FileTime3 = (ulong)File.LastWriteTime.ToFileTimeUtc();
-            FileSizeHigh = 0;
-            FileSizeLow = 0;
-            // Add G3PakFileAttribute_Packed attribute
-            Attributes = (uint)File.Attributes + (uint)G3Pak_FileAttribute.Packed;
+            if (Archive != null)
+            {
+                FileTime1       = Archive.Reader.ReadUInt64();
+                FileTime2       = Archive.Reader.ReadUInt64();
+                FileTime3       = Archive.Reader.ReadUInt64();
+                FileSizeHigh    = Archive.Reader.ReadUInt32();
+                FileSizeLow     = Archive.Reader.ReadUInt32();
+                Attributes      = Archive.Reader.ReadUInt32();
+            }
+            else
+            {
+                throw new InvalidOperationException("Archive not assigned");
+            }
         }
 
-        public void Write(BinaryWriter bw)
+        public void ReadFromFile(FileInfo File)
         {
-            bw.Write(FileTime1);
-            bw.Write(FileTime2);
-            bw.Write(FileTime3);
-            bw.Write(FileSizeHigh);
-            bw.Write(FileSizeLow);
-            bw.Write(Attributes);
+            FileTime1       = (ulong)File.CreationTime.ToFileTimeUtc();
+            FileTime2       = (ulong)File.LastAccessTime.ToFileTimeUtc();
+            FileTime3       = (ulong)File.LastWriteTime.ToFileTimeUtc();
+            FileSizeHigh    = 0;
+            FileSizeLow     = 0;
+            Attributes      = (uint)File.Attributes + (uint)G3Pak_FileAttribute.Packed; // Add G3PakFileAttribute_Packed attribute
+        }
+
+        public void Write()
+        {
+            Archive.Writer.Write(FileTime1);
+            Archive.Writer.Write(FileTime2);
+            Archive.Writer.Write(FileTime3);
+            Archive.Writer.Write(FileSizeHigh);
+            Archive.Writer.Write(FileSizeLow);
+            Archive.Writer.Write(Attributes);
         }
     }
 }
