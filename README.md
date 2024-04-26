@@ -27,6 +27,32 @@ G3Archive [path] [options]
 ```
 G3Archive "C:\Program Files (x86)\Steam\steamapps\common\Gothic 3\Data\_compiledAnimation.pak" --extract --overwrite
 ```
+# Using G3Archive in C# projects
+### Example:
+```cs
+using G3Archive;
+
+namespace G3ArchiveTesting
+{
+    class Program
+    {
+        static async Task Main(string[] args)
+        {
+            string ArchiveFile = @"C:\Program Files (x86)\Steam\steamapps\common\Gothic 3\Data\gui.pak";
+            string ExtractDest = @"C:\Program Files (x86)\Steam\steamapps\common\Gothic 3\Data\gui_extracted";
+            
+            using (G3Pak_Archive Archive = new G3Pak_Archive(ArchiveFile, ExtractDest))
+            {
+                Console.WriteLine($"Archive {Archive.File.Name} initialized");
+
+                await Archive.Extract();
+
+                Console.WriteLine($"Archive extracted");
+            }
+        }
+    } 
+}
+```
 # Dependencies
 - [CommandLineParser](https://github.com/commandlineparser/commandline)
 - [Zlib.Portable](https://github.com/CloudNimble/Zlib.Portable)
